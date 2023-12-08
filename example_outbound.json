@@ -1,0 +1,80 @@
+{
+    "lead":{
+        "id": "1",
+        "first_name": "John",
+        "middle_name": "Doe",
+        "last_name": "Doe",
+        "last_name2": "Doe",
+        "email": "johndoe@gmail.com",
+        "phone_country_code": "+1",
+        "phone": "1234567",
+        "company": "company",
+        "address": "address",
+        "city": "New York",
+        "zip": "1234",
+        "state": "state",
+        "country": "United States",
+        "date_joined": "2018-04-26 00:00:00",
+        "website": "http://www.example.com",
+        "ip": "127.0.0.1",
+        "ip_country": "United States",
+        "facebook": "facebook",
+        "twitter": "twitter",
+        "linkedin": "linkedin",
+        "google_plus": "google_plus",
+        "sales_tax_id": "1234",
+        "lead_picture": "http://www.example.com",
+        "source": "0",
+        "score": "0",
+        "lead_deleted": "0",
+        "lead_deleted_date": "2018-04-26 00:00:00",
+        "referring_id": "0", 
+        "blacklisted": "0",    
+        "source_id": "0",
+        "gdpr_lead_status": 1,
+        "gdpr_lead_status_date": "2018-04-26 00:00:00",
+        "gdpr_lead_status_ip": "127.0.0.1",
+        "gdpr_lead_communications": 0,
+        "custom_fields": [
+	    {
+	        "field_id":"323",
+	        "field_identifier":"color",
+	        "field_type":"checkbox",
+	        "field_value":[
+	            {
+		        "option_id":"1",
+		        "option_value":"red"
+		    },
+		    {
+		        "option_id":"2",
+		        "option_value":"blue"
+		    }
+                ]
+	    },
+	    {
+	        "field_id":"324",
+	        "field_identifier":"gender",
+	        "field_type":"drop_down",
+	        "field_value":[
+	            {
+		        "option_id":"1",
+		        "option_value":"male"
+		    }
+                ]
+	    },
+	    {
+	        "field_id":"325",
+	        "field_identifier":"favorite_dish",
+	        "field_type":"input_field",
+	        "field_value":"beef lasagna"
+	    }
+        ]      
+    },
+    "action":"list_subscription",
+    "action_details":{
+        "list":{
+            "list_id":1,
+            "list_name":"list 1"
+        }
+    }
+}
