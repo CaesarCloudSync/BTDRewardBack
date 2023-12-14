@@ -174,17 +174,20 @@ async def rewardlead(leadaction :str,reward : int,api_key :str,api_pass:str,amar
             else:
                 old_reward = caesarcrud.get_data(("reward",),"rewardleads",f"email = '{email}'")[0]["reward"]
                 new_reward = old_reward + reward
-                res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
-                res = caesarcrud.post_data(("email","reward","action"),(email,reward,leadaction),"rewardactionlogs")
-                if amariverbose:
-                    CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
-            
-                if mulaverbose:
-                    CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                if new_reward < 0:
+                    return {"message":"Insufficient BTD Tokens."}
+                else:
+                    res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
+                    res = caesarcrud.post_data(("email","reward","action"),(email,reward,leadaction),"rewardactionlogs")
+                    if amariverbose:
+                        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                
+                    if mulaverbose:
+                        CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
 
-            
-                return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
- 
+                
+                    return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
+    
 
             
         else:
