@@ -93,20 +93,45 @@ async def login(login_details: JSONStructure = None): # ,authorization: str = He
         return {"error": f"{type(ex)} {str(ex)}"}
     
 @app.post("/v1/reward")
-def reward(data : JSONStructure = None, authorization: str = Header(None)):
-   
-    email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
-    if email:
-            data = dict(data)
-            reward = data["reward"]
-            rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
-            if not rewardlead:
-                res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
+def reward(api_key :str,api_pass:str,data : JSONStructure = None):
+    if api_key == KARTRA_API_KEY and api_pass == KARTRA_API_PASSWORD:
+        email = data["email"]
+        first_name = data["first_name"]
+        last_name = data["last_name"]
+        reward = data["reward"]
+        leadaction = "assignedbyadmin"
+        lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
+        if not lead_exists:
+            res = caesarcrud.post_data(("first_name","last_name","email"),(first_name,last_name,email),"userleads")
+        
+        rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
+        if not rewardlead:
+            res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
+            if data.get("amariverbose"):
+                CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+        
+            if data.get("mulaverbose"):
+                CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction} new balance is {reward} BTD Tokens","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+            return {"message":f"lead rewarded and created {reward}. Total: {reward}"}
+        
+        else:
+            old_reward = caesarcrud.get_data(("reward",),"rewardleads",f"email = '{email}'")[0]["reward"]
+            new_reward = old_reward + reward
+            if new_reward < 0:
+                return {"message":"Insufficient BTD Tokens."}
             else:
-                old_reward = caesarcrud.get_data(("reward",),"rewardleads",f"email = '{email}'")[0]["reward"]
-                new_reward = old_reward + reward
                 res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
-            return {"message":f"lead rewarded {new_reward}."}
+                res = caesarcrud.post_data(("email","reward","action"),(email,reward,leadaction),"rewardactionlogs")
+                if data.get("amariverbose"):
+                    CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+            
+                if data.get("mulaverbose"):
+                    CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+
+            
+                return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
+    else:
+        return {"message":"Unauthorized"}
 @app.get("/v1/getrewardtokens")
 def getreward(authorization: str = Header(None)):
     email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
@@ -130,7 +155,6 @@ def getscoreboard():
             return {"scoreboard":all_rewards}
         else:
             return {"error":"no reward data in database"}
-
 
 
 
