@@ -137,11 +137,12 @@ def getscoreboard():
             
     
 @app.post('/v1/rewardlead')# GET # allow all origins all methods.
-async def rewardlead(leadaction :str,reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
+async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
     try:
         if api_key == KARTRA_API_KEY and api_pass == KARTRA_API_PASSWORD:
             data = dict(data)
             # TODO Store or update storing reward
+            leadaction = data["action"]
             lead_user = data["lead"]
             first_name = lead_user["first_name"]
             last_name = lead_user["last_name"]
@@ -164,8 +165,8 @@ async def rewardlead(leadaction :str,reward : int,api_key :str,api_pass:str,amar
             rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
             if not rewardlead:
                 res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
-                #if amariverbose:
-                CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                if amariverbose:
+                    CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
             
                 if mulaverbose:
                     CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction} new balance is {reward} BTD Tokens","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
@@ -179,8 +180,8 @@ async def rewardlead(leadaction :str,reward : int,api_key :str,api_pass:str,amar
                 else:
                     res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
                     res = caesarcrud.post_data(("email","reward","action"),(email,reward,leadaction),"rewardactionlogs")
-                    #if amariverbose:
-                    CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward} \n {str(data)}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                    if amariverbose:
+                        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
                 
                     if mulaverbose:
                         CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
