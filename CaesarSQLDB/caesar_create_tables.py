@@ -1,7 +1,7 @@
 class CaesarCreateTables:
     def __init__(self) -> None:
         self.usersfields = ("email","password")
-        self.usersleadfields = ("first_name","last_name","last_name2","email","address")
+        self.usersleadfields = ("first_name","last_name","email")
         self.rewardleadfields = ("email","reward")
         self.rewardleadlogfields = ("email","reward","action")
 
@@ -12,7 +12,7 @@ class CaesarCreateTables:
         ("varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "users")
         caesarcrud.create_table("userleadid",self.usersleadfields,
-        ("varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL"),
+        ("varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "userleads")
         caesarcrud.create_table("rewardleadid",self.rewardleadfields,
         ("TEXT NOT NULL","INT NOT NULL"),

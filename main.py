@@ -146,21 +146,12 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             lead_user = data["lead"]
             first_name = lead_user["first_name"]
             last_name = lead_user["last_name"]
-            last_name2 = lead_user["last_name2"]
             email = lead_user["email"]
-            phone_country_code = lead_user["phone_country_code"]
-            phone = lead_user["phone"]
-            company = lead_user["company"]
-            address = lead_user["address"]
-            city = lead_user["city"]
-            zip_code = lead_user["zip"]
-            state = lead_user["state"]
-            country = lead_user["country"]
-            date_joined = lead_user["date_joined"]
+
             # TODO Store reward and match it to the user hash.
             lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
             if not lead_exists:
-                res = caesarcrud.post_data(("first_name","last_name","last_name2","email","address"),(first_name,last_name,last_name2,email,address),"userleads")
+                res = caesarcrud.post_data(("first_name","last_name","email"),(first_name,last_name,email),"userleads")
             
             rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
             if not rewardlead:
