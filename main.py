@@ -93,7 +93,7 @@ async def login(login_details: JSONStructure = None): # ,authorization: str = He
         return {"error": f"{type(ex)} {str(ex)}"}
     
 @app.post("/v1/reward")
-def reward(api_key :str,api_pass:str,data : JSONStructure = None):
+def reward(api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
     if api_key == KARTRA_API_KEY and api_pass == KARTRA_API_PASSWORD:
         email = data["email"]
         first_name = data["first_name"]
@@ -107,10 +107,10 @@ def reward(api_key :str,api_pass:str,data : JSONStructure = None):
         rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
         if not rewardlead:
             res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
-            if data.get("amariverbose"):
+            if amariverbose:
                 CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
         
-            if data.get("mulaverbose"):
+            if mulaverbose:
                 CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction} new balance is {reward} BTD Tokens","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
             return {"message":f"lead rewarded and created {reward}. Total: {reward}"}
         
@@ -122,10 +122,10 @@ def reward(api_key :str,api_pass:str,data : JSONStructure = None):
             else:
                 res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
                 res = caesarcrud.post_data(("email","reward","action"),(email,reward,leadaction),"rewardactionlogs")
-                if data.get("amariverbose"):
+                if amariverbose:
                     CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
             
-                if data.get("mulaverbose"):
+                if mulaverbose:
                     CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
 
             
