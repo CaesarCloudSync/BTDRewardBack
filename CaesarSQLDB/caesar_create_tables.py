@@ -4,10 +4,18 @@ class CaesarCreateTables:
         self.usersleadfields = ("first_name","last_name","email")
         self.rewardleadfields = ("email","reward")
         self.rewardleadlogfields = ("email","reward","action")
+        self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
+        self.invitedfriendsfields = ("recommender_email","friend_email")
 
         
 
     def create(self,caesarcrud):
+        caesarcrud.create_table("aliaslinkid",self.aliaslinksfields,
+        ("varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL"),
+        "aliaslinks")
+        caesarcrud.create_table("aliaslinkid",self.invitedfriendsfields,
+        ("varchar(255) NOT NULL","varchar(255) NOT NULL"),
+        "invitedfriends")
         caesarcrud.create_table("userid",self.usersfields,
         ("varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "users")
