@@ -166,13 +166,13 @@ def storealiaslink(data : JSONStructure = None,authorization: str = Header(None)
         email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
         if email:
             data = dict(data)
-            aliaslink_exists = caesarcrud.check_exists(("*"),"aliaslinks",f"email = '{email}' AND aliaslink = '{data['aliaslink']}'")
+            aliaslink_exists = caesarcrud.check_exists(("*"),"aliaslinks",f"email = '{email}'")
             if not aliaslink_exists:
                 #print((email,data["alias"],data["aliaslink"],data["datewhenaliascreated"]))
                 res = caesarcrud.post_data(("email","alias","aliaslink","datewhenaliascreated"),(email,data["alias"],data["aliaslink"],data["datewhenaliascreated"]),"aliaslinks")
                 return {"message":"alias was stored.","aliaslink":data["aliaslink"]}
             else:
-                return {"error":"alias already exists"}
+                return {"error":"alias already exists for this account."}
 
     except Exception as ex:
         return {"error":f"{type(ex)} = {ex}"}
