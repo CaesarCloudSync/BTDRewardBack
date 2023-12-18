@@ -132,6 +132,24 @@ def reward(api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulav
                 return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
     else:
         return {"message":"Unauthorized"}
+@app.post("/v1/storedinvitedfriend")
+def storedinvitedfriend(data : JSONStructure = None):
+    data = dict(data)
+    friend_email = data["friend_email"]
+    alias = data["alias"]
+
+    alias_exists = caesarcrud.check_exists(("*"),"aliaslinks",f"alias = '{alias}'")
+    if alias_exists:
+        friend_exists = caesarcrud.check_exists(("*"),"invitedfriends",f"friend_email = '{friend_email}'")
+        if not friend_exists:
+            alias_friend = caesarcrud.get_data(("email","alias","aliaslink","datewhenaliascreated"),"aliaslinks",condition=f"alias = '{alias}'")[0]
+            email = alias_friend["email"]
+            res = caesarcrud.post_data(("recommender_email","friend_email"),(email,friend_email),"invitedfriends")
+            return {"message":"invite a friend taken note of."}
+        else:
+            return {"error":"This email has already been recommended."}
+
+
 @app.get("/v1/getrewardtokens")
 def getreward(authorization: str = Header(None)):
     email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
@@ -142,6 +160,37 @@ def getreward(authorization: str = Header(None)):
             return {"email":email,"reward":reward}
         else:
             return {"email":email,"reward":0}
+@app.post("/v1/storealiaslink")
+def storealiaslink(data : JSONStructure = None,authorization: str = Header(None)):
+    try:
+        email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
+        if email:
+            data = dict(data)
+            aliaslink_exists = caesarcrud.check_exists(("*"),"aliaslinks",f"email = '{email}' AND aliaslink = '{data['aliaslink']}'")
+            if not aliaslink_exists:
+                #print((email,data["alias"],data["aliaslink"],data["datewhenaliascreated"]))
+                res = caesarcrud.post_data(("email","alias","aliaslink","datewhenaliascreated"),(email,data["alias"],data["aliaslink"],data["datewhenaliascreated"]),"aliaslinks")
+                return {"message":"alias was stored.","aliaslink":data["aliaslink"]}
+            else:
+                return {"error":"alias already exists"}
+
+    except Exception as ex:
+        return {"error":f"{type(ex)} = {ex}"}
+    
+@app.get("/v1/getaliaslink")
+def getaliaslink(authorization: str = Header(None)):
+    try:
+        email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
+        if email:
+            aliaslink = caesarcrud.get_data(("email","alias","aliaslink","datewhenaliascreated"),"aliaslinks",f"email = '{email}'")
+            if aliaslink:
+                return aliaslink[0]
+            else:
+                return {"error":"aliaslink doesn't exist."}
+
+    except Exception as ex:
+        return {"error":f"{type(ex)} = {ex}"}
+
 
 
 
@@ -203,6 +252,62 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
 
                 
                     return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
+    
+
+            
+        else:
+            return {"error":"not authorized api key and api password incorrect."}
+    except Exception as ex:
+        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Lead Error {email} - {leadaction} - {reward}","attachment":None})
+        return {"error":f"{type(ex)},{ex}"}
+@app.post('/v1/rewardinviteafriend')# GET # allow all origins all methods.
+async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
+    try:
+        if api_key == KARTRA_API_KEY and api_pass == KARTRA_API_PASSWORD:
+            data = dict(data)
+            # TODO Store or update storing reward
+            leadaction = "invite_a_friend_recommendation"
+            lead_user = data["lead"]
+            first_name = lead_user["first_name"]
+            last_name = lead_user["last_name"]
+            friend_email = lead_user["email"]
+
+            # TODO Store reward and match it to the user hash.
+            lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{friend_email}'")
+            if not lead_exists:
+                res = caesarcrud.post_data(("first_name","last_name","email"),(first_name,last_name,friend_email),"userleads")
+            friend_exists = caesarcrud.check_exists(("*"),"invitedfriends",f"friend_email = '{friend_email}'")
+            if friend_exists:
+                invited_friend_data = caesarcrud.get_data(("recommender_email","friend_email"),"invitedfriends",f"friend_email = '{friend_email}'")[0]
+                email = invited_friend_data["recommender_email"]
+                rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
+                if not rewardlead:
+                    res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
+                    if amariverbose:
+                        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                
+                    if mulaverbose:
+                        CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction} new balance is {reward} BTD Tokens","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                    return {"message":f"lead rewarded and created {reward} for {leadaction}. Total: {reward}"}
+                
+                else:
+                    old_reward = caesarcrud.get_data(("reward",),"rewardleads",f"email = '{email}'")[0]["reward"]
+                    new_reward = old_reward + reward
+                    if new_reward < 0:
+                        return {"message":"Insufficient BTD Tokens."}
+                    else:
+                        res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
+                        res = caesarcrud.post_data(("email","reward","action"),(email,reward,leadaction),"rewardactionlogs")
+                        if amariverbose:
+                            CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                    
+                        if mulaverbose:
+                            CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+
+                    
+                        return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
+            else:
+                return {"message":"no invite friend was used with this account."}
     
 
             
