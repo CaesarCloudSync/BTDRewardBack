@@ -7,7 +7,7 @@ class CaesarCreateTables:
         self.rewardleadlogfields = ("email","reward","action")
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
         self.invitedfriendsfields = ("recommender_email","friend_email")
-        self.downloadablesfields = ("downloadabletitle","kartralink","posterfiletype","poster")
+        self.downloadablesfields = ("downloadabletitle","kartralink","tokens","posterfiletype","poster")
 
         
 
@@ -16,7 +16,7 @@ class CaesarCreateTables:
         ("varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "aliaslinks")
         caesarcrud.create_table("downloadablefieldsid",self.downloadablesfields,
-        ("varchar(255) NOT NULL","TEXT NOT NULL","varchar(255) NOT NULL","MEDIUMBLOB"),
+        ("varchar(255) NOT NULL","varchar(255) NOT NULL","TEXT NOT NULL","varchar(255) NOT NULL","MEDIUMBLOB"),
         "downloadables")
 
         

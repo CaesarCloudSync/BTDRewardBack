@@ -61,8 +61,8 @@ async def get_downloadable_content(websocket: WebSocket, client_id: str):
                 if email_exists:
                     downloadables_exist = caesarcrud.check_exists(("*"),"downloadables")
                     if downloadables_exist:
-                        for downloadable in caesarcrud.get_large_data(("downloadabletitle","kartralink","posterfiletype","poster"),"downloadables"):
-                            downloadable = caesarcrud.tuple_to_json(("downloadabletitle","kartralink","posterfiletype","poster"),downloadable)
+                        for downloadable in caesarcrud.get_large_data(("downloadabletitle","kartralink","tokens","posterfiletype","poster"),"downloadables"):
+                            downloadable = caesarcrud.tuple_to_json(("downloadabletitle","kartralink","tokens","posterfiletype","poster"),downloadable)
                             #print(downloadable["kartralink"])
                             downloadable["poster"] = downloadable["posterfiletype"] + caesarcrud.hex_to_base64(downloadable["poster"])
                             for uid, ws in connections.items():
@@ -86,7 +86,7 @@ async def get_downloadable_content(websocket: WebSocket, client_id: str):
     except WebSocketDisconnect:
         del connections[client_id]
 @app.post("/upload_downloadable")
-async def upload_downloadable(poster: Annotated[bytes, File()],downloadabletitle: Annotated[str, Form()],kartralink: Annotated[str, Form()]):
+async def upload_downloadable(poster: Annotated[bytes, File()],downloadabletitle: Annotated[str, Form()],kartralink: Annotated[str, Form()],tokens: Annotated[str, Form()]):
     try:
         #print(poster)
         encoded_post = base64.b64encode(poster).decode("utf-8")
@@ -98,7 +98,7 @@ async def upload_downloadable(poster: Annotated[bytes, File()],downloadabletitle
         if downloadable_exists:
             return {"error":"downloadable already exists."}
         else:
-            res = caesarcrud.post_data(("downloadabletitle","kartralink","posterfiletype"),(downloadabletitle,kartralink,prefix),"downloadables")
+            res = caesarcrud.post_data(("downloadabletitle","kartralink","tokens","posterfiletype"),(downloadabletitle,kartralink,tokens,prefix),"downloadables")
             res = caesarcrud.update_blob("poster",encoded_post,"downloadables",f"kartralink = '{kartralink}' OR downloadabletitle = '{downloadabletitle}'")
             return {"message":"downloadable was uploaded."}
     except Exception as ex:
