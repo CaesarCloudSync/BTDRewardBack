@@ -16,7 +16,7 @@ class CaesarCreateTables:
         ("varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "aliaslinks")
         caesarcrud.create_table("downloadablefieldsid",self.downloadablesfields,
-        ("varchar(255) NOT NULL","varchar(255) NOT NULL","TEXT NOT NULL","varchar(255) NOT NULL","MEDIUMBLOB"),
+        ("varchar(255) NOT NULL","TEXT NOT NULL","INT NOT NULL","varchar(255) NOT NULL","MEDIUMBLOB"),
         "downloadables")
 
         
