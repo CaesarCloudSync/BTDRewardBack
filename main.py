@@ -174,7 +174,7 @@ def reward(api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulav
         first_name = data["first_name"]
         last_name = data["last_name"]
         reward = data["reward"]
-        leadaction = "assignedbyadmin"
+        leadaction = data.get("leadaction") if data.get("leadaction") else "assignedbyadmin"
         lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
         if not lead_exists:
             res = caesarcrud.post_data(("first_name","last_name","email"),(first_name,last_name,email),"userleads")
