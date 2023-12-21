@@ -8,6 +8,7 @@ class CaesarCreateTables:
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
         self.invitedfriendsfields = ("recommender_email","friend_email")
         self.downloadablesfields = ("downloadabletitle","kartralink","tokens","posterfiletype","poster")
+        self.contentdownloadedfields = ("email","downloadabletitle","tokens")
 
         
 
@@ -18,6 +19,10 @@ class CaesarCreateTables:
         caesarcrud.create_table("downloadablefieldsid",self.downloadablesfields,
         ("varchar(255) NOT NULL","TEXT NOT NULL","INT NOT NULL","varchar(255) NOT NULL","MEDIUMBLOB"),
         "downloadables")
+
+        caesarcrud.create_table("contentdownloadedid",self.contentdownloadedfields,
+        ("varchar(255) NOT NULL","varchar(255) NOT NULL","INT NOT NULL"),
+        "contentdownloaded")
 
         
         caesarcrud.create_table("aliaslinkid",self.invitedfriendsfields,
