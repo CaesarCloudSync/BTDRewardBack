@@ -18,6 +18,9 @@ from CaesarJWT.caesarjwt import CaesarJWT
 from CaesarSQLDB.caesar_create_tables import CaesarCreateTables
 from CaesarJWT.caesarjwt import CaesarJWT
 from CaesarAICronEmail.CaesarAIEmail import CaesarAIEmail
+from typing import Annotated
+import base64
+from fastapi import FastAPI, File, Form, UploadFile
 load_dotenv(".env")
 app = FastAPI()
 app.add_middleware(
@@ -39,6 +42,78 @@ JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
+connections: Dict[str, WebSocket] = {}
+
+@app.websocket("/get_downloadable_content/{client_id}")
+async def get_downloadable_content(websocket: WebSocket, client_id: str):
+    await websocket.accept()
+    connections[client_id] = websocket
+
+    try:
+        while True:
+            authinfo = await websocket.receive_json()
+            try:
+                #print(authinfo)
+                authorization = authinfo["headers"]["Authorization"]
+                current_user = maturityjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
+                email_exists = caesarcrud.check_exists(("*"),"users",f"email = '{current_user}'")
+
+                if email_exists:
+                    downloadables_exist = caesarcrud.check_exists(("*"),"downloadables")
+                    if downloadables_exist:
+                        for downloadable in caesarcrud.get_large_data(("downloadabletitle","kartralink","posterfiletype","poster"),"downloadables"):
+                            downloadable = caesarcrud.tuple_to_json(("downloadabletitle","kartralink","posterfiletype","poster"),downloadable)
+                            #print(downloadable["kartralink"])
+                            downloadable["poster"] = downloadable["posterfiletype"] + caesarcrud.hex_to_base64(downloadable["poster"])
+                            for uid, ws in connections.items():
+                                await ws.send_json(downloadable)
+                        for uid, ws in connections.items():
+                            await ws.send_json({"finished":"all sent"})
+                    else:
+                        for uid, ws in connections.items():
+                            await ws.send_json({"error":"downloadables don't exist."})
+                else:
+                    return {"error":"unauthorized."}
+            except Exception as ex:
+                for uid, ws in connections.items():
+                    await ws.send_json({"error":f"{type(ex)}-{ex}"})
+
+                    
+            # Do something with received data (optional)
+            
+
+
+    except WebSocketDisconnect:
+        del connections[client_id]
+@app.post("/upload_downloadable")
+async def upload_downloadable(poster: Annotated[bytes, File()],downloadabletitle: Annotated[str, Form()],kartralink: Annotated[str, Form()]):
+    try:
+        #print(poster)
+        encoded_post = base64.b64encode(poster).decode("utf-8")
+        if "/9j" in encoded_post[:10]:
+            prefix = "data:image/jpeg;base64,"
+        if "iVB" in encoded_post[:10]:
+            prefix = "data:image/png;base64,"
+        downloadable_exists = caesarcrud.check_exists(("*"),"downloadables",f"kartralink = '{kartralink}' OR downloadabletitle = '{downloadabletitle}'")
+        if downloadable_exists:
+            return {"error":"downloadable already exists."}
+        else:
+            res = caesarcrud.post_data(("downloadabletitle","kartralink","posterfiletype"),(downloadabletitle,kartralink,prefix),"downloadables")
+            res = caesarcrud.update_blob("poster",encoded_post,"downloadables",f"kartralink = '{kartralink}' OR downloadabletitle = '{downloadabletitle}'")
+            return {"message":"downloadable was uploaded."}
+    except Exception as ex:
+        return {"error":f"{type(ex)}-{ex}"}
+@app.delete("/delete_downloadable")
+async def delete_downloadable(downloadabletitle : str):
+    try:
+        downloadable_exists = caesarcrud.check_exists(("*"),"downloadables",f"downloadabletitle = '{downloadabletitle}'")
+        if downloadable_exists:
+            res = caesarcrud.delete_data("downloadables",f"downloadabletitle = '{downloadabletitle}'")
+            return {"message":"downloadable was deleted."}
+        else:
+            return {"error":"downloadable does not exist."}
+    except Exception as ex:
+        return {"error":f"{type(ex)}-{ex}"}
 
 
 @app.get('/')# GET # allow all origins all methods.

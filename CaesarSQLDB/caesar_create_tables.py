@@ -1,3 +1,4 @@
+from CaesarSQLDB.caesarcrud import CaesarCRUD
 class CaesarCreateTables:
     def __init__(self) -> None:
         self.usersfields = ("email","password")
@@ -6,13 +7,19 @@ class CaesarCreateTables:
         self.rewardleadlogfields = ("email","reward","action")
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
         self.invitedfriendsfields = ("recommender_email","friend_email")
+        self.downloadablesfields = ("downloadabletitle","kartralink","posterfiletype","poster")
 
         
 
-    def create(self,caesarcrud):
+    def create(self,caesarcrud: CaesarCRUD):
         caesarcrud.create_table("aliaslinkid",self.aliaslinksfields,
         ("varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "aliaslinks")
+        caesarcrud.create_table("downloadablefieldsid",self.downloadablesfields,
+        ("varchar(255) NOT NULL","TEXT NOT NULL","varchar(255) NOT NULL","MEDIUMBLOB"),
+        "downloadables")
+
+        
         caesarcrud.create_table("aliaslinkid",self.invitedfriendsfields,
         ("varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "invitedfriends")
