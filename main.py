@@ -235,7 +235,7 @@ def contentdownloaded(api_key :str,api_pass:str,amariverbose: Union[str, None] =
                         if mulaverbose:
                             CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{email} gained {reward} doing {leadaction} new balance is {reward} BTD Tokens","subject":f"{email} gained {reward} doing {leadaction}","attachment":None})
                         res = caesarcrud.post_data(("email","downloadabletitle","tokens"),(email,downloadabletitle,reward),"contentdownloaded")
-                        return {"message":f"lead rewarded and created {reward}. Total: {reward}"}
+                        return {"message":f"lead rewarded and created {reward}. Total: {reward}","reward":reward}
                     
                     else:
                         old_reward = caesarcrud.get_data(("reward",),"rewardleads",f"email = '{email}'")[0]["reward"]
@@ -251,7 +251,7 @@ def contentdownloaded(api_key :str,api_pass:str,amariverbose: Union[str, None] =
                             if mulaverbose:
                                 CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{email} gained {reward} doing {leadaction}","attachment":None})
                             res = caesarcrud.post_data(("email","downloadabletitle","tokens"),(email,downloadabletitle,reward),"contentdownloaded")
-                            return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
+                            return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}","reward":new_reward}
             else:
                 return {"message":"Unauthorized"}
     
