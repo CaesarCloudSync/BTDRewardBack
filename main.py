@@ -95,8 +95,37 @@ async def get_downloadable_content(websocket: WebSocket, client_id: str):
 
                     
             # Do something with received data (optional)
-            
 
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+@app.websocket("/admin_get_downloadable_content/{client_id}")
+async def admin_get_downloadable_content(websocket: WebSocket, client_id: str):
+    await manager.connect(websocket)
+
+    try:
+        while True:
+            authinfo = await websocket.receive_json()
+            try:
+                if authinfo["api_key"] == KARTRA_API_KEY and authinfo["api_pass"] == KARTRA_API_PASSWORD:
+                    downloadables_exist = caesarcrud.check_exists(("*"),"downloadables")
+                    if downloadables_exist:
+                        for downloadable in caesarcrud.get_large_data(("downloadabletitle","kartralink","tokens","posterfiletype","poster"),"downloadables"):
+                            downloadable = caesarcrud.tuple_to_json(("downloadabletitle","kartralink","tokens","posterfiletype","poster"),downloadable)
+                            #print(downloadable["kartralink"])
+                            downloadable["poster"] = downloadable["posterfiletype"] + caesarcrud.hex_to_base64(downloadable["poster"])
+                            await manager.send_personal_message(downloadable,websocket)
+                        await manager.send_personal_message({"finished":"all sent"},websocket)
+                    else:
+                        await manager.send_personal_message({"error":"downloadables don't exist."},websocket)
+                else:
+                    await manager.send_personal_message({"error":"unauthorized."},websocket)
+            except Exception as ex:
+                await manager.send_personal_message({"error":f"{type(ex)}-{ex}"},websocket)
+                
+
+                    
+            # Do something with received data (optional)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
