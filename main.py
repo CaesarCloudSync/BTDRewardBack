@@ -43,11 +43,29 @@ JSONStructure = Union[JSONArray, JSONObject]
 KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
 connections: Dict[str, WebSocket] = {}
+class ConnectionManager:
+    """Class defining socket events"""
+    def __init__(self):
+        """init method, keeping track of connections"""
+        self.active_connections = []
+    
+    async def connect(self, websocket: WebSocket):
+        """connect event"""
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        """Direct Message"""
+        await websocket.send_json(message)
+    
+    def disconnect(self, websocket: WebSocket):
+        """disconnect event"""
+        self.active_connections.remove(websocket)
+manager = ConnectionManager()
 
 @app.websocket("/get_downloadable_content/{client_id}")
 async def get_downloadable_content(websocket: WebSocket, client_id: str):
-    await websocket.accept()
-    connections[client_id] = websocket
+    await manager.connect(websocket)
 
     try:
         while True:
@@ -65,18 +83,15 @@ async def get_downloadable_content(websocket: WebSocket, client_id: str):
                             downloadable = caesarcrud.tuple_to_json(("downloadabletitle","kartralink","tokens","posterfiletype","poster"),downloadable)
                             #print(downloadable["kartralink"])
                             downloadable["poster"] = downloadable["posterfiletype"] + caesarcrud.hex_to_base64(downloadable["poster"])
-                            for uid, ws in connections.items():
-                                await ws.send_json(downloadable)
-                        for uid, ws in connections.items():
-                            await ws.send_json({"finished":"all sent"})
+                            await manager.send_personal_message(downloadable,websocket)
+                        await manager.send_personal_message({"finished":"all sent"},websocket)
                     else:
-                        for uid, ws in connections.items():
-                            await ws.send_json({"error":"downloadables don't exist."})
+                        await manager.send_personal_message({"error":"downloadables don't exist."},websocket)
                 else:
-                    return {"error":"unauthorized."}
+                    await manager.send_personal_message({"error":"unauthorized."},websocket)
             except Exception as ex:
-                for uid, ws in connections.items():
-                    await ws.send_json({"error":f"{type(ex)}-{ex}"})
+                await manager.send_personal_message({"error":f"{type(ex)}-{ex}"},websocket)
+                
 
                     
             # Do something with received data (optional)
@@ -84,7 +99,7 @@ async def get_downloadable_content(websocket: WebSocket, client_id: str):
 
 
     except WebSocketDisconnect:
-        del connections[client_id]
+        manager.disconnect(websocket)
 @app.post("/upload_downloadable")
 async def upload_downloadable(poster: Annotated[bytes, File()],downloadabletitle: Annotated[str, Form()],kartralink: Annotated[str, Form()],tokens: Annotated[str, Form()]):
     try:
