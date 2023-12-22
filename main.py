@@ -110,10 +110,9 @@ async def admin_get_downloadable_content(websocket: WebSocket, client_id: str):
                 if authinfo["api_key"] == KARTRA_API_KEY and authinfo["api_pass"] == KARTRA_API_PASSWORD:
                     downloadables_exist = caesarcrud.check_exists(("*"),"downloadables")
                     if downloadables_exist:
-                        for downloadable in caesarcrud.get_large_data(("downloadabletitle","kartralink","tokens","posterfiletype","poster"),"downloadables"):
-                            downloadable = caesarcrud.tuple_to_json(("downloadabletitle","kartralink","tokens","posterfiletype","poster"),downloadable)
-                            #print(downloadable["kartralink"])
-                            downloadable["poster"] = downloadable["posterfiletype"] + caesarcrud.hex_to_base64(downloadable["poster"])
+                        for downloadable in caesarcrud.get_large_data(("downloadabletitle","kartralink","tokens"),"downloadables"):
+                            downloadable = caesarcrud.tuple_to_json(("downloadabletitle","kartralink","tokens"),downloadable)
+
                             await manager.send_personal_message(downloadable,websocket)
                         await manager.send_personal_message({"finished":"all sent"},websocket)
                     else:
