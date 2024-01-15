@@ -391,7 +391,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             action_details = data["action_details"]
             action_details_str = str(action_details)
             action_details_hash = CaesarHash.hash_text(action_details_str)
-            print(data)
+            #print(data)
             print(action_details_hash)
 
             # TODO Store reward and match it to the user hash.
