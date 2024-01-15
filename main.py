@@ -389,7 +389,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             last_name = lead_user["last_name"]
             email = lead_user["email"]
             action_details = data["action_details"]
-            action_details_str = str(action_details)
+            action_details_str = json.dumps(action_details)
             action_details_hash = CaesarHash.hash_text(action_details_str)
             #print(data)
             print(action_details_hash)
