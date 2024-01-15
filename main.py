@@ -388,6 +388,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             first_name = lead_user["first_name"]
             last_name = lead_user["last_name"]
             email = lead_user["email"]
+            print(data)
 
             # TODO Store reward and match it to the user hash.
             lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
