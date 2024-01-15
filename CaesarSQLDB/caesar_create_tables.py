@@ -4,7 +4,7 @@ class CaesarCreateTables:
         self.usersfields = ("email","password")
         self.usersleadfields = ("first_name","last_name","email")
         self.rewardleadfields = ("email","reward")
-        self.rewardleadlogfields = ("email","reward","action")
+        self.rewardleadlogfields = ("email","reward","action","actiondetailshash")
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
         self.invitedfriendsfields = ("recommender_email","friend_email")
         self.downloadablesfields = ("downloadabletitle","kartralink","tokens","posterfiletype","poster")
@@ -38,7 +38,7 @@ class CaesarCreateTables:
         ("TEXT NOT NULL","INT NOT NULL"),
         "rewardleads")
         caesarcrud.create_table("rewardleadid",self.rewardleadlogfields,
-        ("TEXT NOT NULL","INT NOT NULL","varchar(255) NOT NULL"),
+        ("TEXT NOT NULL","INT NOT NULL","varchar(255) NOT NULL","TEXT NOT NULL"),
         "rewardactionlogs")
 
 
