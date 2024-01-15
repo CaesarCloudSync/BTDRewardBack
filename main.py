@@ -396,7 +396,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             action_details_str = json.dumps(action_details)
             action_details_hash = CaesarHash.hash_text(action_details_str)
             #print(data)
-            print(action_details_hash)
+            #print(action_details_hash)
 
             # TODO Store reward and match it to the user hash.
             lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
@@ -408,10 +408,10 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
                 res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
                 res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,action_details_hash),"rewardactionlogs")
                 if amariverbose:
-                    CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}\n Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                    CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}<br> Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
             
                 if mulaverbose:
-                    CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction} new balance is {reward} BTD Tokens\n Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                    CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction} new balance is {reward} BTD Tokens<br> Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
                 return {"message":f"lead rewarded and created {reward} for {leadaction}. Total: {reward}"}
             
             else:
@@ -427,10 +427,10 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
                         res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
                         res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,action_details_hash),"rewardactionlogs")
                         if amariverbose:
-                            CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}\n Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                            CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}<br> Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
                     
                         if mulaverbose:
-                            CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}\n Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
+                            CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}<br> Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
 
                     
                         return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
