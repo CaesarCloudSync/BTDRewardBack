@@ -4,7 +4,7 @@ class CaesarCreateTables:
         self.usersfields = ("email","password")
         self.usersleadfields = ("first_name","last_name","email")
         self.rewardleadfields = ("email","reward")
-        self.rewardleadlogfields = ("email","reward","action","actiondetailshash")
+        self.rewardleadlogfields = ("email","reward","action","actiondetailsb64")
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
         self.invitedfriendsfields = ("recommender_email","friend_email")
         self.downloadablesfields = ("downloadabletitle","kartralink","tokens","posterfiletype","poster")

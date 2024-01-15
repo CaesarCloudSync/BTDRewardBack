@@ -219,7 +219,8 @@ def reward(api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulav
             last_name = data["last_name"]
             reward = data["reward"]
             leadaction = data.get("leadaction") if data.get("leadaction") else "assignedbyadmin"
-            rewardlead_hash = CaesarHash.hash_text(email + leadaction)
+            reward_details = email + leadaction
+            rewardlead_b64 = base64.b64encode(reward_details.encode()).decode()
             lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
             if not lead_exists:
                 res = caesarcrud.post_data(("first_name","last_name","email"),(first_name,last_name,email),"userleads")
@@ -227,7 +228,7 @@ def reward(api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulav
             rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
             if not rewardlead:
                 res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
-                res = caesarcrud.post_data(("email","reward","action"),(email,reward,leadaction),"rewardactionlogs")
+                res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,rewardlead_b64),"rewardactionlogs")
                 if amariverbose:
                     CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
             
@@ -267,7 +268,8 @@ def contentdownloaded(api_key :str,api_pass:str,amariverbose: Union[str, None] =
                 downloadabletitle = data["downloadabletitle"]
                 reward = data["tokens"]
                 leadaction = "downloadedcontent"
-                downloadabletitle_hash = CaesarHash.hash_text(downloadabletitle)
+                downloadabletitle_hash = base64.b64encode(downloadabletitle.encode()).decode()
+                
                 contenthasbeendownloaded = caesarcrud.check_exists(("*"),"contentdownloaded",f"email = '{email}' AND downloadabletitle = '{downloadabletitle}'")
                 if contenthasbeendownloaded:
                     return {"exists":"downloadable has already been downloaded."}
@@ -275,7 +277,7 @@ def contentdownloaded(api_key :str,api_pass:str,amariverbose: Union[str, None] =
                     rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
                     if not rewardlead:
                         res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
-                        res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,downloadabletitle_hash),"rewardactionlogs")
+                        res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,downloadabletitle_hash),"rewardactionlogs")
                         if amariverbose:
                             CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{email} gained {reward} doing {leadaction}","attachment":None})
                     
@@ -291,7 +293,7 @@ def contentdownloaded(api_key :str,api_pass:str,amariverbose: Union[str, None] =
                             return {"message":"Insufficient BTD Tokens."}
                         else:
                             res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
-                            res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,downloadabletitle_hash),"rewardactionlogs")
+                            res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,downloadabletitle_hash),"rewardactionlogs")
                             if amariverbose:
                                 CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{email} gained {reward} doing {leadaction}","attachment":None})
                         
@@ -394,7 +396,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             email = lead_user["email"]
             action_details = data["action_details"]
             action_details_str = json.dumps(action_details)
-            action_details_hash = CaesarHash.hash_text(action_details_str)
+            action_details_hash = base64.b64encode(action_details_str.encode()).decode()
             #print(data)
             #print(action_details_hash)
 
@@ -406,7 +408,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
             if not rewardlead:
                 res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
-                res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,action_details_hash),"rewardactionlogs")
+                res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,action_details_hash),"rewardactionlogs")
                 if amariverbose:
                     CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}<br> Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
             
@@ -415,7 +417,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
                 return {"message":f"lead rewarded and created {reward} for {leadaction}. Total: {reward}"}
             
             else:
-                action_exists = caesarcrud.check_exists(("*"),"rewardactionlogs",f"email = '{email}' AND action = '{leadaction}' AND actiondetailshash = '{action_details_hash}'")
+                action_exists = caesarcrud.check_exists(("*"),"rewardactionlogs",f"email = '{email}' AND action = '{leadaction}' AND actiondetailsb64 = '{action_details_hash}'")
                 if action_exists:
                     return {"error":"you have already done this action can't gain tokens."}
                 else:
@@ -425,7 +427,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
                         return {"message":"Insufficient BTD Tokens."}
                     else:
                         res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
-                        res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,action_details_hash),"rewardactionlogs")
+                        res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,action_details_hash),"rewardactionlogs")
                         if amariverbose:
                             CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}<br> Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
                     
@@ -453,7 +455,8 @@ async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbos
             first_name = lead_user["first_name"]
             last_name = lead_user["last_name"]
             friend_email = lead_user["email"]
-            rewardinviteafriend_hash = CaesarHash.hash_text(lead_user + leadaction + friend_email)
+            invitedetails = lead_user + leadaction + friend_email
+            rewardinviteafriend_hash = base64.b64encode(invitedetails.encode()).decode()
 
             # TODO Store reward and match it to the user hash.
             lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{friend_email}'")
@@ -466,7 +469,7 @@ async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbos
                 rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
                 if not rewardlead:
                     res = caesarcrud.post_data(("email","reward"),(email,reward),"rewardleads")
-                    res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,rewardinviteafriend_hash),"rewardactionlogs")
+                    res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,rewardinviteafriend_hash),"rewardactionlogs")
                     if amariverbose:
                         CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained/created {reward} BTD Tokens doing {leadaction} new balance is {reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
                 
@@ -481,7 +484,7 @@ async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbos
                         return {"message":"Insufficient BTD Tokens."}
                     else:
                         res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
-                        res = caesarcrud.post_data(("email","reward","action","actiondetailshash"),(email,reward,leadaction,rewardinviteafriend_hash),"rewardactionlogs")
+                        res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,rewardinviteafriend_hash),"rewardactionlogs")
                         if amariverbose:
                             CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}","subject":f"{first_name} {last_name} - {email} gained {reward} doing {leadaction}","attachment":None})
                     
