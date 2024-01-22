@@ -18,6 +18,7 @@ from CaesarJWT.caesarjwt import CaesarJWT
 from CaesarSQLDB.caesar_create_tables import CaesarCreateTables
 from CaesarJWT.caesarjwt import CaesarJWT
 from CaesarAICronEmail.CaesarAIEmail import CaesarAIEmail
+from inbound_api.KartraInbound import KartraInbound
 from typing import Annotated
 import base64
 from fastapi import FastAPI, File, Form, UploadFile
@@ -40,6 +41,7 @@ caesarcreatetables.create(caesarcrud)
 JSONObject = Dict[Any, Any]
 JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
+kartrainbound = KartraInbound()
 KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
 connections: Dict[str, WebSocket] = {}
@@ -348,6 +350,17 @@ def storealiaslink(data : JSONStructure = None,authorization: str = Header(None)
             else:
                 return {"error":"alias already exists for this account."}
 
+    except Exception as ex:
+        return {"error":f"{type(ex)} = {ex}"}
+    
+@app.post("/v1/get_lead_kartra_inbound")
+def get_lead_kartra_inbound(data : JSONStructure = None):
+    # TODO This is on test mode so emails with @kartra.com can only be accessed like. maintestkartra@kartra.com
+    # TODO When turned into live mode the real data can be accessed.
+    try:
+        email = data["email"]
+        lead_details = kartrainbound.get_leads(email)
+        return lead_details
     except Exception as ex:
         return {"error":f"{type(ex)} = {ex}"}
     
