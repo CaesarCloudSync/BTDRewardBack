@@ -1,0 +1,72 @@
+{
+    "action": "admin_assign_members",
+    "action_details": {
+        "assign_tag": {
+            "tag": "{{tag}}"
+        }
+    },
+    "lead": {
+        "id": "10",
+        "owner_id": "304890",
+        "first_name": "{{first_name}}",
+        "middle_name": "",
+        "last_name": "{{last_name}}",
+        "last_name2": "",
+        "company": "",
+        "sales_tax_id": "",
+        "email": "{{email}}",
+        "username": "{{username}}",
+        "date_joined": "2023-12-05 16:02:04",
+        "phone_country_code": "",
+        "phone": "",
+        "ip": "82.36.137.231",
+        "address": "",
+        "zip": "",
+        "city": "",
+        "state": "",
+        "country": "",
+        "lead_picture": "https://d2uolguxr56s4e.cloudfront.net/img/shared/default_user.svg",
+        "score": "0",
+        "source": "single-optin",
+        "source_id": "10",
+        "ip_country": "GB",
+        "website": "",
+        "facebook": "",
+        "twitter": "",
+        "linkedin": "",
+        "instagram": "",
+        "member_id": "0",
+        "referring_id": "0",
+        "blacklisted": "0",
+        "gdpr_lead_status": "2",
+        "gdpr_lead_status_date": "2023-12-05 16:02:04",
+        "gdpr_lead_communications": "1",
+        "gdpr_lead_status_ip": "82.36.137.231",
+        "lead_preferred_time_zone": "Europe/London",
+        "custom_fields": [
+            {
+                "field_id": "2",
+                "field_identifier": "ENTRY",
+                "field_type": "input_field",
+                "field_value": "2"
+            },
+            {
+                "field_id": "1",
+                "field_identifier": "MonthlyDraw",
+                "field_type": "checkbox",
+                "field_value": [
+                    {
+                        "option_id": "1",
+                        "option_value": "Check or Uncheck"
+                    }
+                ]
+            },
+            {
+                "field_id": "3",
+                "field_identifier": "Referrer",
+                "field_type": "input_field",
+                "field_value": "amari.lawal05@gmail.com"
+            }
+        ]
+    }
+}
