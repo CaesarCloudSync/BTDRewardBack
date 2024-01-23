@@ -382,6 +382,21 @@ def getscoreboard():
 
 
             
+
+@app.get("/v1/get_number_of_members")
+def get_number_of_members():
+    all_leads_exist = caesarcrud.check_exists(("*"),"userleads")
+    if all_leads_exist:
+        membership_leads = caesarcrud.get_data(("email","membership"),"userleads")
+        free_members = len(list(filter(lambda x:x["membership"] == "FREE MEMBERSHIP", membership_leads)))
+        standard_membership = len(list(filter(lambda x:x["membership"] == "Membership 2024 Member", membership_leads)))
+
+        return {"standard_membership":standard_membership,"free_members":free_members}
+        #print(sum(list(filter(lambda x:x["membership"] == "FREE MEMBERSHIP", membership_leads))))
+    else:
+        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"No leads exist in userleads collection","subject":f"Error in get_number_of_members","attachment":None})
+            
+        return {"error":"no leads in database"}
     
 @app.post('/v1/rewardlead')# GET # allow all origins all methods.
 async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
@@ -406,7 +421,6 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
                 res = caesarcrud.post_data(("first_name","last_name","email"),(first_name,last_name,email),"userleads")
                 if action_details.get("tag"):
                     tag_name = action_details.get("tag").get("tag_name")
-
                     if "member" in tag_name.lower():
                         res = caesarcrud.update_data(("membership",),(tag_name,),"userleads",f"email = '{email}'")
 
