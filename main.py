@@ -423,6 +423,13 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
                     tag_name = action_details.get("tag").get("tag_name")
                     if "member" in tag_name.lower():
                         res = caesarcrud.update_data(("membership",),(tag_name,),"userleads",f"email = '{email}'")
+            else:
+                membership_now = caesarcrud.get_data(("membership",),"userleads",f"email = '{email}'")[0]
+                if action_details.get("tag"):
+                    tag_name = action_details.get("tag").get("tag_name")
+                    if "member" in tag_name.lower():
+                        if membership_now != tag_name:
+                            res = caesarcrud.update_data(("membership",),(tag_name,),"userleads",f"email = '{email}'")
 
             
             rewardlead = caesarcrud.check_exists(("*"),"rewardleads",f"email = '{email}'")
