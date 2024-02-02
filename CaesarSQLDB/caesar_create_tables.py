@@ -2,7 +2,7 @@ from CaesarSQLDB.caesarcrud import CaesarCRUD
 class CaesarCreateTables:
     def __init__(self) -> None:
         self.usersfields = ("email","password")
-        self.usersleadfields = ("first_name","last_name","email","membership")
+        self.usersleadfields = ("kartraid","first_name","last_name","email","membership")
         self.rewardleadfields = ("email","reward")
         self.rewardleadlogfields = ("email","reward","action","actiondetailsb64")
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
@@ -32,7 +32,7 @@ class CaesarCreateTables:
         ("varchar(255) NOT NULL","varchar(255) NOT NULL"),
         "users")
         caesarcrud.create_table("userleadid",self.usersleadfields,
-        ("varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255)"),
+        ("INT NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255) NOT NULL","varchar(255)"),
         "userleads")
         caesarcrud.create_table("rewardleadid",self.rewardleadfields,
         ("TEXT NOT NULL","INT NOT NULL"),

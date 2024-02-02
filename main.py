@@ -21,6 +21,7 @@ from CaesarAICronEmail.CaesarAIEmail import CaesarAIEmail
 from typing import Annotated
 import base64
 from fastapi import FastAPI, File, Form, UploadFile
+from fastapi.responses import RedirectResponse
 load_dotenv(".env")
 app = FastAPI()
 app.add_middleware(
@@ -42,6 +43,9 @@ JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
+KUID = os.getenv("KUID")
+KREF = os.getenv("KREF")
+
 connections: Dict[str, WebSocket] = {}
 class ConnectionManager:
     """Class defining socket events"""
@@ -207,6 +211,25 @@ async def login(login_details: JSONStructure = None): # ,authorization: str = He
                 return {"access_token": access_token}
 
         return {"message": "The username or password is incorrect."}
+    except Exception as ex:
+        return {"error": f"{type(ex)} {str(ex)}"}
+@app.get('/v1/authenticatebtdtokenkartra') # POST
+async def authenticatebtdtokenkartra(kuid:str,kref:str,lid): # ,authorization: str = Header(None)
+    # Login API
+
+    try:
+        if kuid == KUID and kref == KREF:
+            condition = f"kartraid = {lid}"
+            kid_lead_exists = caesarcrud.check_exists(("*"),"userleads",condition=condition)
+
+            if kid_lead_exists:
+                kid_lead_email = caesarcrud.get_data(("email",),"userleads",condition=condition)[0]
+                access_token = caesarjwt.secure_encode({"email":kid_lead_email})
+                return RedirectResponse(f"https://blacktechday.netlify.app/BTDtokens?access_token={access_token}&email={kid_lead_email}")
+
+            return {"message": "The username or kid doesn't exist."}
+        else:
+            return {"error":"Unauthorized."}
     except Exception as ex:
         return {"error": f"{type(ex)} {str(ex)}"}
     
@@ -406,6 +429,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             # TODO Store or update storing reward
             leadaction = data["action"]
             lead_user = data["lead"]
+            kartraid = lead_user["id"]
             first_name = lead_user["first_name"]
             last_name = lead_user["last_name"]
             email = lead_user["email"]
@@ -418,7 +442,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             # TODO Store reward and match it to the user hash.
             lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
             if not lead_exists:
-                res = caesarcrud.post_data(("first_name","last_name","email"),(first_name,last_name,email),"userleads")
+                res = caesarcrud.post_data(("kartraid","first_name","last_name","email"),(kartraid,first_name,last_name,email),"userleads")
                 if action_details.get("tag"):
                     tag_name = action_details.get("tag").get("tag_name")
                     if "member" in tag_name.lower():

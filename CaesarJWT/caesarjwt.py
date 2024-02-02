@@ -36,3 +36,4 @@ class CaesarJWT:
                 return "Wrong password"
         else:
             return "Wrong password"
+        
