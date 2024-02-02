@@ -214,7 +214,7 @@ async def login(login_details: JSONStructure = None): # ,authorization: str = He
     except Exception as ex:
         return {"error": f"{type(ex)} {str(ex)}"}
 @app.get('/v1/authenticatebtdtokenkartra') # POST
-async def authenticatebtdtokenkartra(kuid:str,kref:str,lid): # ,authorization: str = Header(None)
+async def authenticatebtdtokenkartra(kuid:str,lid:str): # ,authorization: str = Header(None)
     # Login API
 
     try:
