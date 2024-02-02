@@ -224,8 +224,8 @@ async def authenticatebtdtokenkartra(kuid:str,kref:str,lid): # ,authorization: s
 
             if kid_lead_exists:
                 kid_lead_email = caesarcrud.get_data(("email",),"userleads",condition=condition)[0]
-                access_token = caesarjwt.secure_encode({"email":kid_lead_email})
-                return RedirectResponse(f"https://blacktechday.netlify.app/BTDtokens?access_token={access_token}&email={kid_lead_email}")
+                access_token = caesarjwt.secure_encode(kid_lead_email)
+                return RedirectResponse(f"https://blacktechday.netlify.app/BTDtokens?access_token={access_token}&email={kid_lead_email['email']}")
 
             return {"message": "The username or kid doesn't exist."}
         else:
