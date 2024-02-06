@@ -6,5 +6,5 @@ docker build -t palondomus/blacktechdivisionreward:bestest .
 docker push palondomus/blacktechdivisionreward:bestest
 terraform init
 terraform plan # -o
-terraform appy -auto-approve
+terraform apply -auto-approve
 docker run -it -p 8080:8080 palondomus/blacktechdivisionreward:bestest
