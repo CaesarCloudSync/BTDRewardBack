@@ -1,1 +1,1 @@
-python -m unittest kartra_events_unit.KartraEvents
+python -m unittest kartra_events_unit.KartraEvents $1

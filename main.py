@@ -444,14 +444,17 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             action_details_str = json.dumps(action_details)
             repeatable_action_tags = ["Daily Tokens"]
             # TODO add datetime column to rewardactionlogs
-            if action_details.get("tag").get("tag_name") in repeatable_action_tags:
-                # Vulnerability here, there could be digit clash, so the solution would be to count number of actions in rewardactionlogs, 
-                # To make it sustainable. Create MapReduce/Spark function that specifically counts number of actions done by user then returns it, fetching from large database.
-                action_details_hash = base64.b64encode(action_details_str.encode()).decode() + str(random_with_N_digits(6))
+            if action_details.get("tag"):
+                if action_details.get("tag").get("tag_name") in repeatable_action_tags:
+                    # Vulnerability here, there could be digit clash, so the solution would be to count number of actions in rewardactionlogs, 
+                    # To make it sustainable. Create MapReduce/Spark function that specifically counts number of actions done by user then returns it, fetching from large database.
+                    action_details_hash = base64.b64encode(action_details_str.encode()).decode() + str(random_with_N_digits(6))
+                else:
+                    action_details_hash = base64.b64encode(action_details_str.encode()).decode() 
             else:
                 action_details_hash = base64.b64encode(action_details_str.encode()).decode() 
 
-            
+                
             #print(data)
             #print(action_details_hash)
 
