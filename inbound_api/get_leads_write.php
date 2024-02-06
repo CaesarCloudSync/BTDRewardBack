@@ -11,7 +11,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS,
             'api_key' => 'fPvimQSo',
             'api_password' => 'xfdgUTCcYEqD',
             'get_lead' => array(
-                'email' => 'maintestkartra@kartra.com',
+                'email' => 'amari.lawal@gmail.com',
             ),
         )
     )

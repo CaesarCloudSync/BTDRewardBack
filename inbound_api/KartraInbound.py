@@ -5,7 +5,7 @@ class KartraInbound:
         # PHP Samples
         # https://documentation.kartra.com/category/api/api-inbound/api-inbound-php-samples/
         self.inbound_dir = "inbound_api"
-    def get_leads(self,email):
+    def get_lead_details(self,email):
         with open(f"{self.inbound_dir}/get_leads_read.php","r") as f:
             get_email_read = f.read()
         get_email_read = get_email_read.replace(r"{{email}}",email)
@@ -20,3 +20,7 @@ class KartraInbound:
         else:
             lead_details = json_data["lead_details"]
             return lead_details
+if __name__ == "__main__":
+    kartrainbound = KartraInbound()
+    value = kartrainbound.get_lead_details("amari.lawal@gmail.com")
+    print(value)
