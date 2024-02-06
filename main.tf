@@ -21,13 +21,13 @@ resource "google_project_service" "run_api" {
 }
 
 resource "google_cloud_run_service" "run_service" {
-  name = "apptest"
+  name = "apptest3"
   location = "us-central1"
 
   template {
     spec {
       containers {
-        image = "palondomus/blacktechdivisionreward:bestest"
+        image = "palondomus/blacktechdivisionreward:v1"
       }
     }
   }
@@ -42,7 +42,7 @@ resource "google_cloud_run_service" "run_service" {
 }
 
 # Allow unauthenticated users to invoke the service
-resource "google_cloud_run_service_iam_member" "run_all_users" {
+resource "google_cloud_run_service_iam_member" "noauth" {
   service  = google_cloud_run_service.run_service.name
   location = google_cloud_run_service.run_service.location
   role     = "roles/run.invoker"
