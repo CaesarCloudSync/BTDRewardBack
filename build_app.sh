@@ -1,7 +1,7 @@
 #!/bin/bash
 git add .
 git commit -m "$1"
-git push origin terraformbtd:terraformbtd
+git push origin -u terraformbtd:terraformbtd
 docker build -t palondomus/blacktechdivisionreward:bestest .
 docker push palondomus/blacktechdivisionreward:bestest
 terraform init
