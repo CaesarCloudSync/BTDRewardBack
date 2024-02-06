@@ -1,9 +1,9 @@
 {
-    "action": "assign_video",
+    "action": "assign_tag",
     "action_details": {
-        "video": {
-            "video_id": "1",
-            "video_name": "Daily Tokens"
+        "tag": {
+            "tag_id": "1",
+            "tag_name": "Daily Tokens"
         }
     },
     "lead": {
@@ -35,7 +35,7 @@
         "facebook": "",
         "twitter": "",
         "linkedin": "",
-        "insvideoram": "",
+        "instagram": "",
         "member_id": "0",
         "referring_id": "0",
         "blacklisted": "0",
