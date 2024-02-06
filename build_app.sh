@@ -4,7 +4,7 @@ git commit -m "$1"
 git push origin -u terraformbtd:terraformbtd
 docker build -t palondomus/blacktechdivisionreward:bestest .
 docker push palondomus/blacktechdivisionreward:bestest
-terraform destroy
+#terraform destroy
 terraform init
 terraform plan # -o
 url=$($(terraform apply) | grep blacktechdivisionreward)
