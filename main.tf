@@ -21,7 +21,7 @@ resource "google_project_service" "run_api" {
 }
 
 resource "google_cloud_run_service" "run_service" {
-  name = "blacktechdivisionreward"
+  name = "apptest"
   location = "us-central1"
 
   template {
