@@ -10,7 +10,7 @@ terraform {
 
 provider "google" {
   # Replace `PROJECT_ID` with your project
-  project = "blacktechdivision"
+  project = "btdtestproject"
 }
 
 # Enables the Cloud Run API
