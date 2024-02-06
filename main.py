@@ -43,7 +43,9 @@ JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
-KUID = os.getenv("KUID")
+KREF_DAILY_TOKENS = os.getenv("KREF_DAILY_TOKENS")
+KREF_AUTHENTICATION = os.getenv("KREF_AUTHENTICATION")
+
 
 
 connections: Dict[str, WebSocket] = {}
@@ -214,11 +216,11 @@ async def login(login_details: JSONStructure = None): # ,authorization: str = He
     except Exception as ex:
         return {"error": f"{type(ex)} {str(ex)}"}
 @app.get('/v1/authenticatebtdtokenkartra') # POST
-async def authenticatebtdtokenkartra(kuid:str,lid:str): # ,authorization: str = Header(None)
+async def authenticatebtdtokenkartra(kref:str,lid:str): # ,authorization: str = Header(None)
     # Login API
 
     try:
-        if kuid == KUID:
+        if kref == KREF_DAILY_TOKENS or kref == KREF_AUTHENTICATION:
             condition = f"kartraid = {lid}"
             kid_lead_exists = caesarcrud.check_exists(("*"),"userleads",condition=condition)
 
