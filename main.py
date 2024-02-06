@@ -486,6 +486,9 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             else:
                 action_exists = caesarcrud.check_exists(("*"),"rewardactionlogs",f"email = '{email}' AND action = '{leadaction}' AND actiondetailsb64 = '{action_details_hash}'")
                 if action_exists:
+                    if action_details.get("tag").get("tag_name") in repeatable_action_tags:
+                        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{first_name} {last_name} - {email}  {leadaction} Action Details:{action_details_str}","subject":f"{first_name} {last_name} - {email}, Repeatable Tag assignment Error {action_details.get('tag').get('tag_name')}","attachment":None})
+            
                     print({"error":"you have already done this action can't gain tokens."})
                     return {"error":"you have already done this action can't gain tokens."}
                 else:
