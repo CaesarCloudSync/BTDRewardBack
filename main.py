@@ -22,6 +22,7 @@ from typing import Annotated
 import base64
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import RedirectResponse
+import random
 load_dotenv(".env")
 app = FastAPI()
 app.add_middleware(
@@ -425,6 +426,10 @@ def get_number_of_members():
     
 @app.post('/v1/rewardlead')# GET # allow all origins all methods.
 async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
+    def random_with_N_digits(n):
+        range_start = 10**(n-1)
+        range_end = (10**n)-1
+        return random.randint(range_start, range_end)
     try:
         if api_key == KARTRA_API_KEY and api_pass == KARTRA_API_PASSWORD:
             data = dict(data)
@@ -437,7 +442,16 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             email = lead_user["email"]
             action_details = data["action_details"]
             action_details_str = json.dumps(action_details)
-            action_details_hash = base64.b64encode(action_details_str.encode()).decode()
+            repeatable_action_tags = ["Daily Tokens"]
+            # TODO add datetime to rewardactionlogs
+            if action_details.get("tag").get("tag_name") in repeatable_action_tags:
+                # Vulnerability here, there could be digit clash, so the solution would be to count number of actions in rewardactionlogs, 
+                # To make it sustainable. Create MapReduce/Spark function that specifically counts number of actions done by user then returns it, fetching from large database.
+                action_details_hash = base64.b64encode(action_details_str.encode()).decode() + str(random_with_N_digits())
+            else:
+                action_details_hash = base64.b64encode(action_details_str.encode()).decode() 
+
+            
             #print(data)
             #print(action_details_hash)
 
@@ -472,6 +486,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             else:
                 action_exists = caesarcrud.check_exists(("*"),"rewardactionlogs",f"email = '{email}' AND action = '{leadaction}' AND actiondetailsb64 = '{action_details_hash}'")
                 if action_exists:
+                    print({"error":"you have already done this action can't gain tokens."})
                     return {"error":"you have already done this action can't gain tokens."}
                 else:
                     old_reward = caesarcrud.get_data(("reward",),"rewardleads",f"email = '{email}'")[0]["reward"]
@@ -496,6 +511,7 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             return {"error":"not authorized api key and api password incorrect."}
     except Exception as ex:
         CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Lead Error {email} - {leadaction} - {reward}","attachment":None})
+        print({"error":f"{type(ex)},{ex}"})
         return {"error":f"{type(ex)},{ex}"}
 @app.post('/v1/rewardinviteafriend')# GET # allow all origins all methods.
 async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
