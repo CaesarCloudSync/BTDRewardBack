@@ -168,7 +168,7 @@ async def delete_downloadable(downloadabletitle : str):
 
 @app.get('/')# GET # allow all origins all methods.
 async def index():
-    return "Welcome to CaesarAIWorld! Hammy one"
+    return "Welcome to CaesarAIWorld! Hammy"
 @app.post('/signupapi') # POST
 async def signup(data: JSONStructure = None):
     try:
