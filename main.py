@@ -70,6 +70,10 @@ class ConnectionManager:
         self.active_connections.remove(websocket)
 manager = ConnectionManager()
 
+@app.get('/')# GET # allow all origins all methods.
+async def index():
+    return "Welcome to CaesarAIWorld!"
+
 @app.websocket("/get_downloadable_content/{client_id}")
 async def get_downloadable_content(websocket: WebSocket, client_id: str):
     await manager.connect(websocket)
@@ -166,9 +170,7 @@ async def delete_downloadable(downloadabletitle : str):
         return {"error":f"{type(ex)}-{ex}"}
 
 
-@app.get('/')# GET # allow all origins all methods.
-async def index():
-    return "Welcome to CaesarAIWorld! Hammy"
+
 @app.post('/signupapi') # POST
 async def signup(data: JSONStructure = None):
     try:
