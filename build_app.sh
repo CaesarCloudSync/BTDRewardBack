@@ -7,6 +7,7 @@ function getVersions() {
     echo $oldv $newv
 }
 
+gcloud auth application-default login
 # Change Docker tag in .tf
 read -r oldv newv  <<< $(getVersions)
 sed -i -e "s/blacktechdivisionreward:$oldv/blacktechdivisionreward:$newv/" main.tf
