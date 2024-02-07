@@ -1,22 +1,28 @@
 #!/bin/bash
+image="blacktechdivisionreward"
+
 function getVersions() {
-    IN=$(cat main.tf | grep palondomus/blacktechdivisionreward)
+    IN=$(cat main.tf | grep palondomus/$image)
     arrIN=(${IN//:/ })
     oldv=$((${arrIN[3]::-1}))
     newv=$(($oldv+1))
     echo $oldv $newv
 }
 
+
+
+# Auth GCP Cloud
 gcloud auth application-default login
+
 # Change Docker tag in .tf
 read -r oldv newv  <<< $(getVersions)
-sed -i -e "s/blacktechdivisionreward:$oldv/blacktechdivisionreward:$newv/" main.tf
+sed -i -e "s/$image:$oldv/$image:$newv/" main.tf
 
 
 
 # Push Docker
-docker build -t palondomus/blacktechdivisionreward:$newv .
-docker push palondomus/blacktechdivisionreward:$newv
+docker build -t palondomus/$image:$newv .
+docker push palondomus/$image:$newv
 
 # Terraform Push Google Cloud
 terraform init
@@ -29,7 +35,7 @@ git commit -m "$1"
 git push origin -u master:master
 
 # Test application
-docker run -it -p 8080:8080 palondomus/blacktechdivisionreward:$newv
+docker run -it -p 8080:8080 palondomus/$image:$newv
 
 
 
