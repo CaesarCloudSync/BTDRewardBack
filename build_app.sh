@@ -26,6 +26,8 @@ terraform apply -auto-approve
 git add .
 git commit -m "$1"
 git push origin -u terraformbtd:terraformbtd
+
+# Test application
 docker run -it -p 8080:8080 palondomus/blacktechdivisionreward:$newv
 
 
