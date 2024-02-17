@@ -22,6 +22,10 @@ from typing import Annotated
 import base64
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import RedirectResponse
+from BTDGCMeet.BTDCalendar import BTDCalendar
+from BTDGCMeet.BTDGCMeet import BTDGCMeet
+from BTDGCMeet.BTDCalendarModel import CreateEventModel
+from CaesarAIRedis.BTDRedis import BTDRedis
 import random
 load_dotenv(".env")
 app = FastAPI()
@@ -46,7 +50,14 @@ KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
 KREF_DAILY_TOKENS = os.getenv("KREF_DAILY_TOKENS")
 KREF_AUTHENTICATION = os.getenv("KREF_AUTHENTICATION")
-
+CALENDAR_NAME = 'Black Tech Division Meetings'
+btdcalendar = BTDCalendar()
+btdgcmeet = BTDGCMeet()
+btdredis = BTDRedis()
+space = btdgcmeet.create_space()
+calendar_exists = btdcalendar.check_calendar_exists(CALENDAR_NAME)
+if not calendar_exists:
+    btdcalendar.create_calendar(CALENDAR_NAME)
 
 
 connections: Dict[str, WebSocket] = {}
@@ -73,6 +84,25 @@ manager = ConnectionManager()
 @app.get('/')# GET # allow all origins all methods.
 async def index():
     return "Welcome to CaesarAIWorld!"
+@app.post("/v1/create_google_meet_event")
+async def create_google_meet_event(event :CreateEventModel):
+    event = event.model_dump()
+    event_name = event["summary"]
+    description = event["description"]
+    if not btdcalendar.check_event_exists(CALENDAR_NAME,event_name):
+        space = btdgcmeet.create_space()
+        # maybe store space.name in redis
+        print(space.name)
+        btdredis.set_space(space.name,space.meeting_uri)
+        event["description"] = f"Meeting ID:{space.meeting_uri}"+"<br>"+event["description"]
+        btdcalendar.create_event(CALENDAR_NAME,event,verbose=0)
+        for attendee in event["attendees"]:
+            CaesarAIEmail.send(**{"email":attendee["email"],"subject":f"{event_name} Event","message":f"Meeting ID: {space.meeting_uri}<br>{description}"})
+        CaesarAIEmail.send(**{"email":event["organizer"]["email"],"subject":f"{event_name} Event","message":f"Meeting ID: {space.meeting_uri}<br>{description}"})
+        return {"message":f"{event_name} scheduled."}
+    else:
+        return {"error":"event already exists."}
+
 
 @app.websocket("/get_downloadable_content/{client_id}")
 async def get_downloadable_content(websocket: WebSocket, client_id: str):
