@@ -7,11 +7,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.apps import meet_v2 as meet
 from google.cloud import pubsub_v1
 import threading
+#from BTDGCMeet.BTDRedis import BTDRedis
 from BTDRedis import BTDRedis
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]  = "google_credentials.json"
 class BTDGCMeet:
     def __init__(self) -> None:
         self.USER_CREDENTIALS = self.authorize()
+        self.TOPIC_NAME = "projects/blacktechdivision/topics/workspace-events"
+        self.SUBSCRIPTION_NAME = "projects/blacktechdivision/subscriptions/workspace-events-sub"
 
 
     def authorize(self) -> Credentials:
@@ -93,6 +96,10 @@ class BTDGCMeet:
             parsed_session_path["conference_record"],
             parsed_session_path["participant"])
         return client.get_participant(name=participant_resource_name)
+    def fetch_conference_from_session(self,session_name:str):
+        client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
+        parsed_session_path = client.parse_participant_session_path(session_name)
+        return parsed_session_path["conference_record"]
 
 
     def on_conference_started(self,message: pubsub_v1.subscriber.message.Message):
@@ -102,7 +109,7 @@ class BTDGCMeet:
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
         conference = client.get_conference_record(name=resource_name)
         print(f"Conference (ID {conference.name}) started at {conference.start_time.rfc3339()}")
-        CaesarAIEmail.send(**{"email":"amari.lawal@gmail.com","subject":f"Conference Started: {conference.name} at {conference.start_time.rfc3339()}","message":f"Conference Started: {conference.name} at {conference.start_time.rfc3339()}"})
+        #CaesarAIEmail.send(**{"email":"amari.lawal@gmail.com","subject":f"Conference Started: {conference.name} at {conference.start_time.rfc3339()}","message":f"Conference Started: {conference.name} at {conference.start_time.rfc3339()}"})
 
 
     def on_conference_ended(self,message: pubsub_v1.subscriber.message.Message):
@@ -120,6 +127,7 @@ class BTDGCMeet:
         resource_name = payload.get("participantSession").get("name")
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
         session = client.get_participant_session(name=resource_name)
+        #print(self.fetch_conference_from_session(resource_name))
         participant = self.fetch_participant_from_session(resource_name)
         display_name = self.format_participant(participant)
         print(f"{display_name} joined at {session.start_time.rfc3339()}")
@@ -127,6 +135,7 @@ class BTDGCMeet:
 
     def on_participant_left(self,message: pubsub_v1.subscriber.message.Message):
         """Display information about a participant when they leave a meeting."""
+        # TODO print(message.attributes.get("ce-subject")) "ce-subject": "//meet.googleapis.com/spaces/RINPAObvU1YB"
         payload = json.loads(message.data)
         resource_name = payload.get("participantSession").get("name")
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
@@ -192,17 +201,27 @@ class BTDGCMeet:
         subscriber = pubsub_v1.SubscriberClient()
         future = subscriber.subscribe(subscription_name, callback=self.on_message)
         return future.result()
-if __name__ == "__main__":
-    TOPIC_NAME = "projects/blacktechdivision/topics/workspace-events"
-    SUBSCRIPTION_NAME = "projects/blacktechdivision/subscriptions/workspace-events-sub"
-    btdgcmeet = BTDGCMeet()
-    btdredis = BTDRedis()
-    #space =  btdgcmeet.create_space()
-    #print(f"Join the meeting at {space.meeting_uri}")
-    for spaceredis in btdredis.get_all_spaces():
-        space_name =list(spaceredis.keys())[0]
-        meeting_uri =space_name =list(spaceredis.values())[0]
-        print(f"Subscribing to meeting at {meeting_uri}")
+    def listen_redis(self):
+        btdredis = BTDRedis()
+        for spaceredis in btdredis.get_all_spaces():   
+            space_name_session =list(spaceredis.keys())[0]
+            space_name = space_name_session.split(":")[1]
+            #print(space_name)
+            meeting_uri =list(spaceredis.values())[0]
+            print(f"Subscribing to meeting at {meeting_uri}, {space_name}")
+            subscription =self.subscribe_to_space(topic_name=self.TOPIC_NAME, space_name=space_name)
+            #print(subscription.json())
+            #.delete_space(space_name)
+        self.listen_for_events(subscription_name=self.SUBSCRIPTION_NAME)
 
-        subscription =btdgcmeet.subscribe_to_space(topic_name=TOPIC_NAME, space_name=space_name)
-    btdgcmeet.listen_for_events(subscription_name=SUBSCRIPTION_NAME)
+    def create_listen(self):
+        for i in range(3):
+            space =  self.create_space()
+            print(f"Join the meeting at {space.meeting_uri}")
+            subscription = self.subscribe_to_space(topic_name=self.TOPIC_NAME, space_name=space.name)
+            print(subscription.json())
+        self.listen_for_events(subscription_name=self.SUBSCRIPTION_NAME)
+if __name__ == "__main__":
+
+    btdgcmeet = BTDGCMeet()
+    btdgcmeet.listen_redis()

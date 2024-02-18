@@ -89,6 +89,7 @@ async def create_google_meet_event(event :CreateEventModel):
     event = event.model_dump()
     event_name = event["summary"]
     description = event["description"]
+    duration = event_name["start"][""]
     if not btdcalendar.check_event_exists(CALENDAR_NAME,event_name):
         space = btdgcmeet.create_space()
         # maybe store space.name in redis

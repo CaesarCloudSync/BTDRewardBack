@@ -32,7 +32,7 @@ class KartraEvents(unittest.TestCase):
 class GCPMeetCase(unittest.TestCase):
     def test_create_event(self):
         event = {
-        "summary": "Google I/O 2016",
+        "summary": "Google I/O 2024",
         "location": "800 Howard St., San Francisco, CA 94103",
         "description": f"A chance to hear more about Google\"s developer products.",
         "start": {
