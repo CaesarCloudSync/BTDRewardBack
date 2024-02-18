@@ -7,6 +7,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.apps import meet_v2 as meet
 from google.cloud import pubsub_v1
 import threading
+from BTDRedis import BTDRedis
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]  = "google_credentials.json"
 class BTDGCMeet:
     def __init__(self) -> None:
         self.USER_CREDENTIALS = self.authorize()
@@ -14,12 +16,12 @@ class BTDGCMeet:
 
     def authorize(self) -> Credentials:
         """Ensure valid credentials for calling the Meet REST API."""
-        CLIENT_SECRET_FILE = "./client_secret.json"
+        CLIENT_SECRET_FILE = "./MeetSecret/client_secret.json"
         credentials = None
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
-        if os.path.exists(f'{dir_path}/token.json'):
-            credentials = Credentials.from_authorized_user_file(f'{dir_path}/token.json')
+        if os.path.exists(f'{dir_path}/MeetSecret/token.json'):
+            credentials = Credentials.from_authorized_user_file(f'{dir_path}/MeetSecret/token.json')
 
         if credentials is None:
             flow = InstalledAppFlow.from_client_secrets_file(
@@ -34,7 +36,7 @@ class BTDGCMeet:
             credentials.refresh(requests.Request())
 
         if credentials is not None:
-            with open(f"{dir_path}/token.json", "w") as f:
+            with open(f"{dir_path}/MeetSecret/token.json", "w") as f:
                 f.write(credentials.to_json())
 
         return credentials
@@ -179,11 +181,11 @@ class BTDGCMeet:
         with subscriber:
             future = subscriber.subscribe(subscription_name, callback=self.on_message)
             print("Listening for events")
-            try:
-                future.result()
+            #try:
+            future.result()
 
-            except KeyboardInterrupt:
-                future.cancel()
+            #except KeyboardInterrupt:
+            #    future.cancel()
         print("Done")
     def subscribe_futures(self,subscription_name: str = None):
         """Subscribe to events on the given subscription."""
@@ -194,10 +196,13 @@ if __name__ == "__main__":
     TOPIC_NAME = "projects/blacktechdivision/topics/workspace-events"
     SUBSCRIPTION_NAME = "projects/blacktechdivision/subscriptions/workspace-events-sub"
     btdgcmeet = BTDGCMeet()
-    subscriber_shutdown = threading.Event()
-    subscriber_futures = []
-    space =  btdgcmeet.create_space()
-    print(f"Join the meeting at {space.meeting_uri}")
-    #print(space.name)
-    subscription =btdgcmeet.subscribe_to_space(topic_name=TOPIC_NAME, space_name=space.name)
+    btdredis = BTDRedis()
+    #space =  btdgcmeet.create_space()
+    #print(f"Join the meeting at {space.meeting_uri}")
+    for spaceredis in btdredis.get_all_spaces():
+        space_name =list(spaceredis.keys())[0]
+        meeting_uri =space_name =list(spaceredis.values())[0]
+        print(f"Subscribing to meeting at {meeting_uri}")
+
+        subscription =btdgcmeet.subscribe_to_space(topic_name=TOPIC_NAME, space_name=space_name)
     btdgcmeet.listen_for_events(subscription_name=SUBSCRIPTION_NAME)

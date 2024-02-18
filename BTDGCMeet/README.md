@@ -19,7 +19,7 @@
 
 1. Next add google calendar
 
-Code above can stay the same it will do exactly this but google cloud run will force it to timeout.
+1. Code above can stay the same it will do exactly this but google cloud run will force it to timeout.
 TODO in hook specify who is the host to avoid trying to give tokens.
 Can Track and assign BTD tokens. Store all the people who leave in that meeting and time left into redis. Then when When confirence end finishes for that meeting reward the people who left 5 minutes before max tokens.
 TODO Google Calnedar

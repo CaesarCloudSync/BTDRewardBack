@@ -32,12 +32,13 @@ class KartraEvents(unittest.TestCase):
 class GCPMeetCase(unittest.TestCase):
     def test_create_event(self):
         event = {
-        "summary": "Google I/O 2015",
+        "summary": "Google I/O 2016",
         "location": "800 Howard St., San Francisco, CA 94103",
         "description": f"A chance to hear more about Google\"s developer products.",
         "start": {
             "dateTime": (datetime.utcnow() + timedelta(days=1)).isoformat(),
             "timeZone": "Europe/London",
+
         },
         "end": {
             "dateTime": (datetime.utcnow() + timedelta(days=1, hours=1)).isoformat(),
@@ -65,5 +66,6 @@ class GCPMeetCase(unittest.TestCase):
         }
         response = requests.post(f"{uri}/v1/create_google_meet_event",json=event)
         print(response.json())
+
 if __name__ == "__main__":
     unittest.main()

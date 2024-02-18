@@ -4,8 +4,8 @@ from google.auth.transport.requests import Request
 from datetime import datetime, timedelta
 import os.path
 import pickle
-from BTDGCMeet.BTDExceptions import CalendarDoesNotExist,EventDoesNotExist,UpdateEventKeyDoesNotExist,NotIsoFormat
-from BTDGCMeet.BTDCalendarModel import CreateEventModel,CreateCalendarModel
+from BTDExceptions import CalendarDoesNotExist,EventDoesNotExist,UpdateEventKeyDoesNotExist,NotIsoFormat
+from BTDCalendar.BTDCalendarModel import CreateEventModel,CreateCalendarModel
 from googleapiclient.discovery import Resource
 
 # https://medium.com/@ayushbhatnagarmit/supercharge-your-scheduling-automating-google-calendar-with-python-87f752010375
@@ -17,8 +17,8 @@ class BTDCalendar:
         self.event_fields = ['summary','location','description','start',"end","timeZone"]
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
-        if os.path.exists(f'{dir_path}/token.pickle'):
-            with open(f'{dir_path}/token.pickle', 'rb') as token:
+        if os.path.exists(f'{dir_path}/CalendarSecrets/token.pickle'):
+            with open(f'{dir_path}/CalendarSecrets/token.pickle', 'rb') as token:
                 creds = pickle.load(token)
 
         if not creds or not creds.valid:
@@ -26,10 +26,10 @@ class BTDCalendar:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    f'{dir_path}/gccalendar_credentials.json', SCOPES)
+                    f'{dir_path}/CalendarSecrets/gccalendar_credentials.json', SCOPES)
                 creds = flow.run_local_server(port=0)
 
-            with open(f'{dir_path}/token.pickle', 'wb') as token:
+            with open(f'{dir_path}/CalendarSecrets/token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
 
         self.service : Resource = build('calendar', 'v3', credentials=creds)

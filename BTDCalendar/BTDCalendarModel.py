@@ -2,7 +2,7 @@ from pydantic import BaseModel,Field,model_validator
 from typing import List,Optional,Any
 from datetime import datetime,date
 import re
-from BTDGCMeet.BTDExceptions import UserMissingPrimaryKey,NotEmailAddress,RecurrenceRRuleFormatIncorrect,NoRecurrenceField,NotIsoFormat
+from BTDExceptions import UserMissingPrimaryKey,NotEmailAddress,RecurrenceRRuleFormatIncorrect,NoRecurrenceField,NotIsoFormat
 class AttendeeDataModel(BaseModel):
     email: Optional[str] = None
     id: Optional[str] =None
@@ -72,7 +72,7 @@ class CreateEventModel(BaseModel):
     organizer : OrganizerModel
     attachments :Optional[List[str]] = None # https url
     reminders:ReminderModel
-    recurrence:List[str] = Field(min_length=1) #RRULE:FREQ=DAILY;COUNT=2
+    recurrence:List[str] = Field(min_length=1,max_length=1) #RRULE:FREQ=DAILY;COUNT=2
     @model_validator(mode="before")
     @classmethod
     def from_literal(cls, data: Any) -> Any:

@@ -22,9 +22,9 @@ from typing import Annotated
 import base64
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import RedirectResponse
-from BTDGCMeet.BTDCalendar import BTDCalendar
+from BTDCalendar.BTDCalendar import BTDCalendar
 from BTDGCMeet.BTDGCMeet import BTDGCMeet
-from BTDGCMeet.BTDCalendarModel import CreateEventModel
+from BTDCalendar.BTDCalendarModel import CreateEventModel
 from CaesarAIRedis.BTDRedis import BTDRedis
 import random
 load_dotenv(".env")
@@ -92,7 +92,7 @@ async def create_google_meet_event(event :CreateEventModel):
     if not btdcalendar.check_event_exists(CALENDAR_NAME,event_name):
         space = btdgcmeet.create_space()
         # maybe store space.name in redis
-        print(space.name)
+        #print(space.name)
         btdredis.set_space(space.name,space.meeting_uri)
         event["description"] = f"Meeting ID:{space.meeting_uri}"+"<br>"+event["description"]
         btdcalendar.create_event(CALENDAR_NAME,event,verbose=0)
