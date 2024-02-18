@@ -1,12 +1,17 @@
 
 from .CaesarAIRedis import CaesarAIRedis
 
-
+from BTDCalendar.BTDCalendarModel import SpaceRedisMappingModel
 class BTDRedis(CaesarAIRedis):
     def __init__(self) -> None:
         super().__init__()
     def set_space(self,key,value):
-        self.r.set(f"space:{key}",value)
+        mapping = SpaceRedisMappingModel.model_validate(value)
+        mapping = dict(mapping)
+        finalvalue = ""
+        for value in mapping.values():
+            finalvalue += f"{str(value)}|"
+        self.r.set(f"space:{key}",finalvalue)
     def get_space(self,key):
         return self.r.get(f"space:{key}")
     def delete_space(self,key):

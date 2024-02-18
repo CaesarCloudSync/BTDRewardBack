@@ -17,3 +17,27 @@ class BTDRedis(CaesarAIRedis):
             for key in keybatch:
                 if key:
                     yield {key:self.r.get(key)}
+    def set_conference(self,key,value):
+        self.r.set(f"conference:{key}",value)
+    def get_conference(self,key):
+        return self.r.get(f"conference:{key}")
+    def delete_conference(self,key):
+        self.r.delete(f"conference:{key}")
+    def get_all_conference(self,batch:str=500):
+        # in batches of 500 delete keys matching user:*
+        for keybatch in self.batcher(self.r.scan_iter('conference:*'),batch):
+            for key in keybatch:
+                if key:
+                    yield {key:self.r.get(key)}
+    def set_participant_session(self,key,value):
+        self.r.set(f"participant-session:{key}",value)
+    def get_participant_session(self,key):
+        return self.r.get(f"participant-session:{key}")
+    def delete_participant_session(self,key):
+        self.r.delete(f"participant-session:{key}")
+    def get_all_participant_session(self,batch:str=500):
+        # in batches of 500 delete keys matching user:*
+        for keybatch in self.batcher(self.r.scan_iter('participant-session:*'),batch):
+            for key in keybatch:
+                if key:
+                    yield {key:self.r.get(key)}

@@ -7,6 +7,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.apps import meet_v2 as meet
 from google.cloud import pubsub_v1
 import threading
+from datetime import datetime,timedelta
+import time
 #from BTDGCMeet.BTDRedis import BTDRedis
 from BTDRedis import BTDRedis
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]  = "google_credentials.json"
@@ -15,6 +17,9 @@ class BTDGCMeet:
         self.USER_CREDENTIALS = self.authorize()
         self.TOPIC_NAME = "projects/blacktechdivision/topics/workspace-events"
         self.SUBSCRIPTION_NAME = "projects/blacktechdivision/subscriptions/workspace-events-sub"
+        self.btdredis = BTDRedis()
+        # Redis Format: time_spent = "0:00:31.058324"
+        # Redis Format: space_info = "https://meet.google.com/cjj-reyw-vak|1:00:00.000018|RRULE:FREQ=WEEKLY;COUNT=3|0|"
 
 
     def authorize(self) -> Credentials:
@@ -85,6 +90,59 @@ class BTDGCMeet:
             return f"{participant.phone_user.display_name} (Phone)"
 
         return "Unknown participant"
+    def format_participant_id(self,participant: meet.Participant):
+        """Formats a participant for display on the console."""
+        if participant.anonymous_user:
+            return False
+
+        if participant.signedin_user:
+            return participant.signedin_user.user
+
+        if participant.phone_user:
+            return False
+
+        return "Unknown participant"
+    def parse_prefix(lself,line, fmt):
+        try:
+            t = datetime.strptime(line, fmt)
+        except ValueError as v:
+            if len(v.args) > 0 and v.args[0].startswith('unconverted data remains: '):
+                line = line[:-(len(v.args[0]) - 26)]
+                t = datetime.strptime(line, fmt)
+            else:
+                raise
+        return t.time()
+    def delete_space_if_all_hosted(self,space_id,space_info):
+        overall_number_of_meetings = int(space_info.split("|")[2].split("=")[-1])
+        number_times_hosted = int(space_info.split("|")[3])
+        if overall_number_of_meetings == number_times_hosted+1:
+            # delete space in redis
+            self.btdredis.delete_space(space_id)
+        else:
+            number_times_hosted += 1
+            space_info_list = space_info.split("|")
+            space_info_list[3] = str(number_times_hosted)
+            final_space_info = '|'.join(space_info_list)
+            # set redis again
+            self.btdredis.set_space(space_id,final_space_info)
+        
+
+
+    def fetch_percentage_time_spent(self,time_spent,duration):
+        time_spent_strp = self.parse_prefix(time_spent,'%H:%M:%S')
+        duration_strp = self.parse_prefix(duration,'%H:%M:%S')
+        time_spent_delta = timedelta(hours=time_spent_strp.hour, minutes=time_spent_strp.minute, seconds=time_spent_strp.second)
+        duration_delta = timedelta(hours=duration_strp.hour, minutes=duration_strp.minute, seconds=duration_strp.second)
+        return (time_spent_delta/duration_delta) * 100
+    def fetch_space_from_message(self,message: pubsub_v1.subscriber.message.Message):
+        space = message.attributes.get("ce-subject").split("/")[-2] + "/" + message.attributes.get("ce-subject").split("/")[-1]
+        return space
+    def fetch_time_spent_and_conference_id(self,participant_info) -> str:
+        conference_id,start_time_participant = participant_info.split("|")[0],participant_info.split("|")[1]
+        time_spent_in_session = str(datetime.now() - datetime.fromisoformat(start_time_participant))
+        return conference_id,time_spent_in_session
+
+
 
 
     def fetch_participant_from_session(self,session_name: str) -> meet.Participant:
@@ -99,7 +157,13 @@ class BTDGCMeet:
     def fetch_conference_from_session(self,session_name:str):
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
         parsed_session_path = client.parse_participant_session_path(session_name)
-        return parsed_session_path["conference_record"]
+        return f"conferenceRecords/{parsed_session_path['conference_record']}"
+    def fetch_conference_from_participant(self,resource_name):
+        conference = resource_name.split("/")[0] + "/" + resource_name.split("/")[1]
+        return conference
+    def fetch_google_id(self,participant_id):
+        return participant_id.split("/")[-1]
+
 
 
     def on_conference_started(self,message: pubsub_v1.subscriber.message.Message):
@@ -108,9 +172,9 @@ class BTDGCMeet:
         resource_name = payload.get("conferenceRecord").get("name")
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
         conference = client.get_conference_record(name=resource_name)
-        print(f"Conference (ID {conference.name}) started at {conference.start_time.rfc3339()}")
-        #CaesarAIEmail.send(**{"email":"amari.lawal@gmail.com","subject":f"Conference Started: {conference.name} at {conference.start_time.rfc3339()}","message":f"Conference Started: {conference.name} at {conference.start_time.rfc3339()}"})
 
+        #self.btdredis.set_conference(conference.name,datetime.now().isoformat())
+        print(f"Conference (ID {conference.name}) started at {conference.start_time.rfc3339()}")
 
     def on_conference_ended(self,message: pubsub_v1.subscriber.message.Message):
         """Display information about a conference when ended."""
@@ -118,6 +182,10 @@ class BTDGCMeet:
         resource_name = payload.get("conferenceRecord").get("name")
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
         conference = client.get_conference_record(name=resource_name)
+        space = self.fetch_space_from_message(message)
+        space_info = self.btdredis.get_space(space)
+        if space_info:
+            self.delete_space_if_all_hosted(space,space_info)
         print(f"Conference (ID {conference.name}) ended at {conference.end_time.rfc3339()}")
 
 
@@ -127,21 +195,37 @@ class BTDGCMeet:
         resource_name = payload.get("participantSession").get("name")
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
         session = client.get_participant_session(name=resource_name)
-        #print(self.fetch_conference_from_session(resource_name))
+        conference = self.fetch_conference_from_participant(resource_name)
         participant = self.fetch_participant_from_session(resource_name)
+
         display_name = self.format_participant(participant)
+        participant_id = self.format_participant_id(participant)
+        self.btdredis.set_participant_session(participant_id,f"{conference}|{datetime.now().isoformat()}")
         print(f"{display_name} joined at {session.start_time.rfc3339()}")
 
 
     def on_participant_left(self,message: pubsub_v1.subscriber.message.Message):
         """Display information about a participant when they leave a meeting."""
-        # TODO print(message.attributes.get("ce-subject")) "ce-subject": "//meet.googleapis.com/spaces/RINPAObvU1YB"
         payload = json.loads(message.data)
         resource_name = payload.get("participantSession").get("name")
         client = meet.ConferenceRecordsServiceClient(credentials=self.USER_CREDENTIALS)
         session = client.get_participant_session(name=resource_name)
         participant = self.fetch_participant_from_session(resource_name)
         display_name = self.format_participant(participant)
+        participant_id = self.format_participant_id(participant)
+        participant_info = self.btdredis.get_participant_session(participant_id)
+        if participant_info:
+            conference_id,time_spent = self.fetch_time_spent_and_conference_id(participant_info)
+            space = self.fetch_space_from_message(message)
+            space_info = self.btdredis.get_space(space)
+            if space_info: # This makes sure that expired events don't get reused to increase tokens.
+                duration = space_info.split("|")[1]
+                percent_spent = self.fetch_percentage_time_spent(time_spent,duration)
+                if percent_spent > 80:
+                    google_id = self.fetch_google_id(participant_id)
+                    # TODO assign tokens use SQL database from mobile apps signup to match to google_id
+            self.btdredis.delete_participant_session(participant_id)
+                
         print(f"{display_name} left at {session.end_time.rfc3339()}")
 
 
@@ -202,8 +286,8 @@ class BTDGCMeet:
         future = subscriber.subscribe(subscription_name, callback=self.on_message)
         return future.result()
     def listen_redis(self):
-        btdredis = BTDRedis()
-        for spaceredis in btdredis.get_all_spaces():   
+        
+        for spaceredis in self.btdredis.get_all_spaces():   
             space_name_session =list(spaceredis.keys())[0]
             space_name = space_name_session.split(":")[1]
             #print(space_name)
@@ -219,9 +303,5 @@ class BTDGCMeet:
             space =  self.create_space()
             print(f"Join the meeting at {space.meeting_uri}")
             subscription = self.subscribe_to_space(topic_name=self.TOPIC_NAME, space_name=space.name)
-            print(subscription.json())
+            #print(subscription.json())
         self.listen_for_events(subscription_name=self.SUBSCRIPTION_NAME)
-if __name__ == "__main__":
-
-    btdgcmeet = BTDGCMeet()
-    btdgcmeet.listen_redis()

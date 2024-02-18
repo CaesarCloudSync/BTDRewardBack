@@ -12,6 +12,9 @@
 - https://developers.google.com/meet/api/guides/tutorial-events-python
 - **Be Wary of Permissions, gcloud auth login and project and service accounts**
 
+## Google Calendar Tutorial
+- https://developers.google.com/calendar/api/guides/create-events
+- Event JSON Body: https://developers.google.com/calendar/api/v3/reference/events#resource-representations
 1. To allow you to record meetings get Google Admin Account
 2. Get Google Workspace account
 3. Pay for Google workspace £5 month

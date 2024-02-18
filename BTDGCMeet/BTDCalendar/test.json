@@ -1,0 +1,45 @@
+{
+    "summary": "Google I/O 2015",
+    "location": "800 Howard St., San Francisco, CA 94103",
+    "description": "A chance to hear more about Google's developer products.",
+    "attendees": [
+        {
+            "email": "lpage@example.com",
+            "organizer": false,
+            "optional": false
+        },
+        {
+            "email": "sbrin@example.com",
+            "organizer": false,
+            "optional": false
+        }
+    ],
+    "start": {
+        "dateTime": "2024-02-18T03:01:08.105081",
+        "timeZone": "Europe/London"
+    },
+    "end": {
+        "dateTime": "2024-02-18T04:01:08.105093",
+        "timeZone": "Europe/London"
+    },
+    "organizer": {
+        "email": "amari.lawal@gmail.com",
+        "self": true
+    },
+    "reminders": {
+        "useDefault": false,
+        "overrides": [
+            {
+                "method": "email",
+                "minutes": 1440
+            },
+            {
+                "method": "popup",
+                "minutes": 10
+            }
+        ]
+    },
+    "recurrence": [
+        "RRULE:FREQ=DAILY;COUNT=2"
+    ]
+}

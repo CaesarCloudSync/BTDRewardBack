@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "blacktechdivision",
+  "private_key_id": "6acb29f5e09b2ba19ce7d3221d1a087759b8de9f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCdq6I+VT4Per0W\nEWBKpyeUTTG1n3PZX/AQm8lhWqg6PgvQLsa38ZJWaVYa2AgoOh8dj/ybBz8M6M4w\noWNfrfzI+fv3eglS4pAaNO0VXLqaNeo2A6pHV9u2bOETpdLuqy/QgZEb8CohsFol\nc4igyLZ/gAQEQYBYXg+FXB6vP+SaQrVzAbHVl0FQCxaSkvmjkq9pZtZYMThws/D4\nn9DXMl2YlYzDg7eOo9rJGGp4zrrZCQU0tosjsPQCUOCU/NLrOj0GWayklGdNO7xx\njzzXA5dZjuexbKD6VW8TVc+TKOlT/8e7oKS6Fp3yYoq6pA5c8093OVkyrggl3YJp\nhEsjuIbfAgMBAAECggEAHpxJSee7vj6agjPKaYPtQ7X+7h9wWuXs0hSksrFqkrAk\nE/1Y2DJeskcOD/UcFE9AZjljleeAvq1eBoP2qoc5Wf1qhR/cuopA5s2ar7iKg9Du\n0SDCCMrOXariwbFCc9KpXEYjWXS1gUffIIE/J9P/1l4QqZDb7YwJYF9Dl8uEQsxd\nrPPMCjCt/WrnPBjVUnlk/pKWj78OsQYr1H3RH11xKszLDa46RDk7riH/8xHBfhO1\nGQk5XlVL1hDAzyflvQYzhMM4KMIJJC9hYeCmm9FcFj6NMk5YWnQiyYvTmArR6HQU\nOLtwSSF+L3oD0YPu+e6mTBx9OtV95gIddMdIm6AXpQKBgQDNlfzmjlWHc30JUZm3\nFN18meDcyGjAnID/8Qk2U3dkt+FPgaWGSBZLqlNebGhYTEPWHesoakTvHRdms7rO\n5Uq0VDDBOce658AKa1J+Yi4rb1S0f178XZ+2gjFGo86vIi4uY8yx6TncO6yV1sri\nSZ8SxWJg5drDc0YUyJHeWg8Q+wKBgQDEVauceAYYlfHs9fbJbWeI8jLtAovtcK/e\n/6XczA0h8DUfW/ApMsPD0/Bar+IFzIRp0K3SI5fblM1VD8q2/pAVJ/gcBKKQUwCW\nmvcrHc3eSVKq2n/Kw6H31NhWMcBCE4SV0NaDcupPtoaRRikuNgD2/i4k49+jO4y+\nvuGOcNEkbQKBgQDCM7EWydWZgkrXBrJB8//VuDZl2Rq6+BwTqcmd+/KIvfqkdD+8\nPVRyXY8rXxSidEiQduqw3tIHXl/AsH8C+i47clwr6zz1Hf6W2RKwOGaMuTo21ysP\nEhHRAeMya4LOhWdCgxvV5A64L9a0JJa6c/lEbhikl/yzLK1C7MR+WmxpCQKBgCT9\nKu64ohVhsol9MXhzdy0SzEtgznH2Z/vwWBRIETVSpv94d7+bQ8ySEldTiZakGFJD\nMWxErmh9GU4sQnnFbem+dPz6VpIwQQ0etvBVliKJ19w+fBL8Vnh1jih3CQyp1rHO\n/YsYTFKmRaX6/Okq3XWrH5BtqgV7w6FwHtiSIqTlAoGBAL3729kxAwLXvAliQEfn\nr8EmtcottjomE/O6ETl3+7NL149vlq71vCntR2rFWcZG/EvMHAQENGJNULn6/W5O\n8CC2Ze4tT6B/jIUjL6W9aJI+KKwTyeP+a6TOYAzH6KM6MKIqxQN6iy+rL/xsc8SK\noajNnoJs1twd9oGxJmcMIzHP\n-----END PRIVATE KEY-----\n",
+  "client_email": "btdschedule@blacktechdivision.iam.gserviceaccount.com",
+  "client_id": "117781372534056071115",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/btdschedule%40blacktechdivision.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
