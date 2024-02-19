@@ -5,7 +5,13 @@ from itertools import zip_longest
 
 class CaesarAIRedis:
     def __init__(self) -> None:
-        self.r= redis.Redis(host='localhost', port=6379, decode_responses=True)
+        # Upstash Redis, next is Google Cloud.
+        self.r = redis.Redis( 
+        host='usw1-sunny-sailfish-34066.upstash.io',
+        port=34066,
+        password='3460114dad564306ac1acbacc9d36995',
+        ssl=True,
+            decode_responses=True)
 
     def setkey(self,key:str,mapping:dict):
         self.r.hset(key,mapping=mapping)
