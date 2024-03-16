@@ -24,8 +24,9 @@ class KartraEvents(unittest.TestCase):
         """
         with open("kartra_events/assign_daily_token.json","r") as f:
             assign_daily = json.load(f)
-        response = requests.post(f"{uri}/v1/rewardlead?&reward=20&api_key=fPvimQSo&api_pass=xfdgUTCcYEqD&amariverbose=true",json=assign_daily)
-        #print(response.json())
+        for i in range(300):
+            response = requests.post(f"{uri}/v1/rewardlead?&reward=20&api_key=fPvimQSo&api_pass=xfdgUTCcYEqD&amariverbose=true",json=assign_daily)
+            print(response.json())
         self.assertEqual(response.json().get("error"),None)
         self.assertNotEqual(response.json().get("error"),"you have already done this action can't gain tokens.")
 
