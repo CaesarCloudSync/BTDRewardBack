@@ -27,7 +27,7 @@ class CaesarCreateTables:
         caesarcrud.create_table("rewardleadid",self.rewardleadfields,
         ("TEXT NOT NULL","INT NOT NULL"),
         "rewardleads")
-        caesarcrud.create_table("rewardleadid",self.rewardleadlogfields,
+        caesarcrud.create_table("rewardleadactionid",self.rewardleadlogfields,
         ("TEXT NOT NULL","INT NOT NULL","varchar(255) NOT NULL","TEXT NOT NULL"),
         "rewardactionlogs")
 
