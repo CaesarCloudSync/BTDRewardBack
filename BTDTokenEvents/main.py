@@ -35,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(levelname)s - %(message)s',    handlers=[logging.FileHandler("app.log",mode='a'),logging.StreamHandler()])
+logging.basicConfig(level=logging.DEBUG,format='%(levelname)s: %(message)s - %(asctime)s ',    handlers=[logging.FileHandler("app.log",mode='a'),logging.StreamHandler()])
 logger = logging.getLogger(__name__)
 
 
@@ -51,6 +51,7 @@ KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
 CALENDAR_NAME = 'Black Tech Division Meetings'
 kartrakrefs = KartraKrefs()
+CHECKSUM_SECRET = os.getenv("CHECKSUM_SECRET")
 
 connections: Dict[str, WebSocket] = {}
 class ConnectionManager:
@@ -233,22 +234,34 @@ async def authenticatebtdtokenkartra(kref:str,lid:str): # ,authorization: str = 
 
             if kid_lead_exists:
                 kid_lead_email = caesarcrud.get_data(("email",),"userleads",condition=condition)[0]
+                email = kid_lead_email['email']
                 access_token = caesarjwt.secure_encode(kid_lead_email)
                 if kref == kartrakrefs.KREF_DAILY_TOKENS:
                     logging.info('Daily Tokens Authentication Worked')
-                    return RedirectResponse(f"https://blacktechday.netlify.app/btdtokens?access_token={access_token}&email={kid_lead_email['email']}&dest=daily_tokens")
+                    return RedirectResponse(f"https://blacktechday.netlify.app/btdtokens?access_token={access_token}&email={email}&dest=daily_tokens")
                 elif kref == kartrakrefs.KREF_AUTHENTICATION:
                     logging.info('Kartra Authentication Worked')
-                    return RedirectResponse(f"https://blacktechday.netlify.app/btdtokens?access_token={access_token}&email={kid_lead_email['email']}&dest=auth")
+                    return RedirectResponse(f"https://blacktechday.netlify.app/btdtokens?access_token={access_token}&email={email}&dest=auth")
                 elif kref in kartrakrefs.get_shop_items():
                     logging.info(f'{kref} Redirect Works')
                     price = kartrakrefs.get_shop_item_price(kref)
-                    return RedirectResponse(f"https://blacktechday.netlify.app/purchaseshoptokens?access_token={access_token}&email={kid_lead_email['email']}&dest=shop",headers={"shop_item":kref,"price":price})     
+                    url = f"https://blacktechday.netlify.app/purchaseshoptokens?access_token={access_token}&email={email}&dest=shop&shop_item={kref}&price={price}"
+                    checksum_string = url + CHECKSUM_SECRET
+                    checksum = hashlib.md5(checksum_string.encode()).hexdigest()
+                    condition_checksum = f"email = '{email}' AND checksum = '{checksum}' AND shopitemkref = '{kref}'"
+                    pending_purchase_exists = caesarcrud.check_exists(("*"),"pendingpurchases",condition_checksum)
+                    if pending_purchase_exists:
+                        logging.info(f'Pending Purchase for {kref} has been updated')
+                        caesarcrud.update_data(("email","checksum","shopitemkref"),(email,checksum,kref),"pendingpurchases",condition_checksum)
+                    else:
+                        logging.info(f'Pending Purchase for {kref} has been created.')
+                        caesarcrud.post_data(("email","checksum","shopitemkref"),(email,checksum,kref),"pendingpurchases")
+                    return RedirectResponse(url)     
             return {"message": "The username or kid doesn't exist."}
         else:
             return {"error":"Unauthorized."}
     except Exception as ex:
-        return {"error": f"{type(ex)} {str(ex)}"}
+        return {"error": f"{type(ex)} {str(ex)}"},400
     
 @app.post("/v1/reward")
 def reward(api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):

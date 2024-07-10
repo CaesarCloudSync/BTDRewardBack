@@ -7,6 +7,7 @@ class CaesarCreateTables:
         self.rewardleadlogfields = ("email","reward","action","actiondetailsb64")
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
         self.invitedfriendsfields = ("recommender_email","friend_email")
+        self.pendingpurchasesfields = ("email","checksum","shopitemkref")
 
         
 
@@ -30,4 +31,7 @@ class CaesarCreateTables:
         caesarcrud.create_table("rewardleadactionid",self.rewardleadlogfields,
         ("TEXT NOT NULL","INT NOT NULL","varchar(255) NOT NULL","TEXT NOT NULL"),
         "rewardactionlogs")
+        caesarcrud.create_table("pendingpurchasesid",self.pendingpurchasesfields,
+        ("varchar(255) NOT NULL","TEXT NOT NULL","varchar(255) NOT NULL"),
+        "pendingpurchases")
 
