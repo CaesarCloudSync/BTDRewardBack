@@ -485,7 +485,7 @@ def checkpurchaseintegrity(purchaseitemdata :PurchaseShopItemModel,authorization
             if pending_purchase_exists:
                 return {"message":"purchase is valid"}
             else:
-                return {"error":"purchase mismatch, purchase url is invalid"},400
+                return {"error":"purchase mismatch, purchase url is invalid"}
     except Exception as ex:
         return {"error":f"{type(ex)} = {ex}"}
     
