@@ -25,7 +25,7 @@ import logging
 load_dotenv(".env")
 import random
 from KartraKrefs.KartraKrefs import KartraKrefs
-
+from Models.PurchaseShopItemModel import PurchaseShopItemModel
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -450,6 +450,25 @@ def get_number_of_members():
         CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"No leads exist in userleads collection","subject":f"Error in get_number_of_members","attachment":None})
             
         return {"error":"no leads in database"}
+@app.post("/v1/purchaseshopitem")
+def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str = Header(None)):
+    try:
+        purchaseitemdata = purchaseitemdata.model_dump()
+        email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
+        path = purchaseitemdata["path"]
+        shop_item_kref = purchaseitemdata["shop_item_kref"]
+        url = "https://blacktechday.netlify.app" + path
+        if email:
+            checksum_string = url + CHECKSUM_SECRET
+            checksum = hashlib.md5(checksum_string.encode()).hexdigest()
+            condition_checksum = f"email = '{email}' AND checksum = '{checksum}' AND shopitemkref = '{shop_item_kref}'"
+            pending_purchase_exists = caesarcrud.check_exists(("*"),"pendingpurchases",condition_checksum)
+            if pending_purchase_exists:
+                return {"message":"purchased"}
+            else:
+                return {"error":"purchase mismatch"},400
+    except Exception as ex:
+        return {"error":f"{type(ex)} = {ex}"}
     
 @app.post('/v1/rewardlead')# GET # allow all origins all methods.
 async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
@@ -611,6 +630,6 @@ async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbos
 
 if __name__ == "__main__":
 
-    uvicorn.run("main:app",port=8080,log_level="info")
+    uvicorn.run("main:app",port=8080,log_level="info",host="0.0.0.0")
     #uvicorn.run()
     #asyncio.run(main())
