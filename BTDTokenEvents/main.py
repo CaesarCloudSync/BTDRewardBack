@@ -473,7 +473,9 @@ def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str 
                     if new_reward < 0:
                         return {"error":"Insufficient BTD Tokens."}
                     else:
-                        return {"message":"purchase was made.","new_amount":new_reward,"old_amount":old_reward,"price":price}
+                        caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",condition=f"email = '{email}'")
+                        caesarcrud.delete_data("pendingpurchases",condition_checksum)
+                        return {"message":"purchase was made."}
 
                 else:
                     return {"error":"unathorized no tokens exist."}
