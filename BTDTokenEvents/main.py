@@ -456,6 +456,7 @@ def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str 
         purchaseitemdata = purchaseitemdata.model_dump()
         email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
         path = purchaseitemdata["path"]
+        price = purchaseitemdata["price"]
         shop_item_kref = purchaseitemdata["shop_item_kref"]
         url = "https://blacktechday.netlify.app" + path
         if email:
@@ -464,9 +465,20 @@ def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str 
             condition_checksum = f"email = '{email}' AND checksum = '{checksum}' AND shopitemkref = '{shop_item_kref}'"
             pending_purchase_exists = caesarcrud.check_exists(("*"),"pendingpurchases",condition_checksum)
             if pending_purchase_exists:
-                return {"message":"purchased"}
+                reward_leads_exist = caesarcrud.check_exists(("*"),"rewardleads",condition=f"email = '{email}'")
+                if reward_leads_exist:
+                    user_tokens = caesarcrud.get_data(("email","reward"),"rewardleads",condition=f"email = '{email}'")[0]
+                    old_reward = user_tokens["reward"]
+                    new_reward = old_reward -  int(price)
+                    if new_reward < 0:
+                        return {"error":"Insufficient BTD Tokens."}
+                    else:
+                        return {"message":"purchase was made.","new_amount":new_reward,"old_amount":old_reward,"price":price}
+
+                else:
+                    return {"error":"unathorized no tokens exist."}
             else:
-                return {"error":"purchase mismatch"},400
+                return {"error":"purchase mismatch"}
     except Exception as ex:
         return {"error":f"{type(ex)} = {ex}"}
 @app.post("/v1/checkpurchaseintegrity")
