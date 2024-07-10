@@ -8,7 +8,7 @@ class CaesarCreateTables:
         self.aliaslinksfields = ("email","alias","aliaslink","datewhenaliascreated")
         self.invitedfriendsfields = ("recommender_email","friend_email")
         self.pendingpurchasesfields = ("email","checksum","shopitemkref")
-
+        self.purchaseactionlogsfields = ("email","shopitemkref","price","datetime")
         
 
     def create(self,caesarcrud: CaesarCRUD):
@@ -34,4 +34,7 @@ class CaesarCreateTables:
         caesarcrud.create_table("pendingpurchasesid",self.pendingpurchasesfields,
         ("varchar(255) NOT NULL","TEXT NOT NULL","varchar(255) NOT NULL"),
         "pendingpurchases")
+        caesarcrud.create_table("purchaseactionlogsid",self.purchaseactionlogsfields,
+        ("varchar(255) NOT NULL","varchar(255) NOT NULL","INT NOT NULL","varchar(255) NOT NULL"),
+        "purchaseactionlogs")
 

@@ -22,6 +22,7 @@ import base64
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import RedirectResponse
 import logging
+from datetime import datetime
 load_dotenv(".env")
 import random
 from KartraKrefs.KartraKrefs import KartraKrefs
@@ -473,8 +474,10 @@ def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str 
                     if new_reward < 0:
                         return {"error":"Insufficient BTD Tokens."}
                     else:
+                        time_purchased = datetime.now().isoformat()
                         caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",condition=f"email = '{email}'")
                         caesarcrud.delete_data("pendingpurchases",condition_checksum)
+                        caesarcrud.post_data(("email","shopitemkref","price","datetime"),(email,shop_item_kref,price,time_purchased))
                         return {"message":"purchase was made."}
 
                 else:
