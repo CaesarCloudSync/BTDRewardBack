@@ -21,10 +21,11 @@ from typing import Annotated
 import base64
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import RedirectResponse
-
-
-import random
+import logging
 load_dotenv(".env")
+import random
+from KartraKrefs.KartraKrefs import KartraKrefs
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -33,6 +34,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(levelname)s - %(message)s',    handlers=[logging.FileHandler("app.log",mode='a'),logging.StreamHandler()])
+logger = logging.getLogger(__name__)
 
 
 caesarcrud = CaesarCRUD()
@@ -45,10 +49,8 @@ JSONArray = List[Any]
 JSONStructure = Union[JSONArray, JSONObject]
 KARTRA_API_KEY = os.getenv("KARTRA_API_KEY")
 KARTRA_API_PASSWORD = os.getenv("KARTRA_API_PASSWORD")
-KREF_DAILY_TOKENS = os.getenv("KREF_DAILY_TOKENS")
-KREF_AUTHENTICATION = os.getenv("KREF_AUTHENTICATION")
 CALENDAR_NAME = 'Black Tech Division Meetings'
-
+kartrakrefs = KartraKrefs()
 
 connections: Dict[str, WebSocket] = {}
 class ConnectionManager:
@@ -225,16 +227,18 @@ async def authenticatebtdtokenkartra(kref:str,lid:str): # ,authorization: str = 
     # Login API
 
     try:
-        if kref == KREF_DAILY_TOKENS or kref == KREF_AUTHENTICATION:
+        if kref in kartrakrefs.get_krefs():
             condition = f"kartraid = {lid}"
             kid_lead_exists = caesarcrud.check_exists(("*"),"userleads",condition=condition)
 
             if kid_lead_exists:
                 kid_lead_email = caesarcrud.get_data(("email",),"userleads",condition=condition)[0]
                 access_token = caesarjwt.secure_encode(kid_lead_email)
-                if kref == KREF_DAILY_TOKENS:
+                if kref == kartrakrefs.KREF_DAILY_TOKENS:
+                    logging.info('Daily Tokens Authentication Worked')
                     return RedirectResponse(f"https://blacktechday.netlify.app/btdtokens?access_token={access_token}&email={kid_lead_email['email']}&dest=daily_tokens")
-                else:
+                elif kref == kartrakrefs.KREF_AUTHENTICATION:
+                    logging.info('Kartra Authentication Worked')
                     return RedirectResponse(f"https://blacktechday.netlify.app/btdtokens?access_token={access_token}&email={kid_lead_email['email']}&dest=auth")
 
             return {"message": "The username or kid doesn't exist."}

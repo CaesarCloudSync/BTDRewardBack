@@ -29,7 +29,18 @@ class KartraEvents(unittest.TestCase):
             print(response.json())
         self.assertEqual(response.json().get("error"),None)
         self.assertNotEqual(response.json().get("error"),"you have already done this action can't gain tokens.")
-
+class KartraAuthTokens(unittest.TestCase):
+    def test_auth_kartra_user(self):
+        response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=CdAaTisnL3Za&lid=10") # amari.lawal@gmail.com - get this from supabase kartraid userleads table
+        # API log Success = INFO - Kartra Authentication Worked
+        response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=CdAaTisnL3Za&lid=11") # amari.lawal05@gmail.com - get this from supabase kartraid userleads table
+        # API log Success = INFO - Kartra Authentication Worked
+    def test_daily_tokens(self):
+        response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=5iGhjmo0NqCp&lid=10") # amari.lawal@gmail.com - get this from supabase kartraid userleads table
+        # API log Success = INFO - Daily Tokens Authentication Worked
+        response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=5iGhjmo0NqCp&lid=11") # amari.lawal05@gmail.com - get this from supabase kartraid userleads table
+        # API log Success = INFO - Daily Tokens Authentication Worked
+class KartraShopTest(uni)
 class GCPMeetCase(unittest.TestCase):
     def test_create_event(self):
         event = {
