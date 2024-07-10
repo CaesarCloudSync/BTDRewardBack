@@ -240,7 +240,10 @@ async def authenticatebtdtokenkartra(kref:str,lid:str): # ,authorization: str = 
                 elif kref == kartrakrefs.KREF_AUTHENTICATION:
                     logging.info('Kartra Authentication Worked')
                     return RedirectResponse(f"https://blacktechday.netlify.app/btdtokens?access_token={access_token}&email={kid_lead_email['email']}&dest=auth")
-
+                elif kref in kartrakrefs.get_shop_items():
+                    logging.info(f'{kref} Redirect Works')
+                    price = kartrakrefs.get_shop_item_price(kref)
+                    return RedirectResponse(f"https://blacktechday.netlify.app/purchaseshoptokens?access_token={access_token}&email={kid_lead_email['email']}&dest=shop",headers={"shop_item":kref,"price":price})     
             return {"message": "The username or kid doesn't exist."}
         else:
             return {"error":"Unauthorized."}

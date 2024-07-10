@@ -40,7 +40,16 @@ class KartraAuthTokens(unittest.TestCase):
         # API log Success = INFO - Daily Tokens Authentication Worked
         response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=5iGhjmo0NqCp&lid=11") # amari.lawal05@gmail.com - get this from supabase kartraid userleads table
         # API log Success = INFO - Daily Tokens Authentication Worked
-class KartraShopTest(uni)
+class KartraShopTest(unittest.TestCase):
+    def test_buy_item_1(self):
+        response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=NPzfqk58IZdT&lid=11") # amari.lawal@gmail.com - get this from supabase kartraid userleads table
+        # API log Success = INFO - Shop Item 1 Redirect Works
+    def test_buy_item_2(self):
+        response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=rbGW6nusecZa&lid=11") # amari.lawal@gmail.com - get this from supabase kartraid userleads table
+        # API log Success = INFO - Shop Item 2 Redirect Works
+
+        print(response.headers)
+
 class GCPMeetCase(unittest.TestCase):
     def test_create_event(self):
         event = {
