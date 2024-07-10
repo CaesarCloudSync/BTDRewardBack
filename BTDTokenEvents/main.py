@@ -477,7 +477,7 @@ def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str 
                         time_purchased = datetime.now().isoformat()
                         caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",condition=f"email = '{email}'")
                         caesarcrud.delete_data("pendingpurchases",condition_checksum)
-                        caesarcrud.post_data(("email","shopitemkref","price","datetime"),(email,shop_item_kref,price,time_purchased))
+                        caesarcrud.post_data(("email","shopitemkref","price","datetime"),(email,shop_item_kref,price,time_purchased),"purchaseactionlogs")
                         return {"message":"purchase was made."}
 
                 else:
