@@ -79,6 +79,10 @@ manager = ConnectionManager()
 async def index():
     return "Welcome to CaesarAIWorld!"
 
+@app.post("/api/v1/wakeupdb")
+async def wakeupdb():
+    user = caesarcrud.get_data(("email",),"userleads",getamount=1)
+    return {"message":"database is awake."}
 
 @app.websocket("/get_downloadable_content/{client_id}")
 async def get_downloadable_content(websocket: WebSocket, client_id: str):
