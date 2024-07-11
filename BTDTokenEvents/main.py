@@ -167,6 +167,32 @@ async def upload_downloadable(poster: Annotated[bytes, File()],downloadabletitle
             return {"message":"downloadable was uploaded."}
     except Exception as ex:
         return {"error":f"{type(ex)}-{ex}"}
+@app.get("/v1/get_reward_action_logs")
+async def get_reward_action_logs():
+    try:
+        reward_action_logs_exists = caesarcrud.check_exists(("*"),"rewardactionlogs")
+        if reward_action_logs_exists:
+            reward_action_logs = caesarcrud.get_data(("email","reward","action","actiondetailsb64"),"rewardactionlogs")
+            for action in reward_action_logs:
+                action["actiondetailsb64"] =json.loads(base64.b64decode(action["actiondetailsb64"]).decode())
+                
+            return {"reward_action_logs":reward_action_logs}
+        else:
+            return {"error":"action logs do not exists."}
+    except Exception as ex:
+        return {"error":f"{type(ex)}-{ex}"}
+@app.get("/v1/get_purchase_logs")
+async def get_purchase_logs():
+    try:
+        purchase_logs_exists = caesarcrud.check_exists(("*"),"purchaseactionlogs")
+        if purchase_logs_exists:
+            purchase_logs = caesarcrud.get_data(("email","shopitemkref","price","datetime"),"purchaseactionlogs")
+            return {"purchase_logs":purchase_logs}
+        else:
+            return {"error":"purchase logs do not exists."}
+            
+    except Exception as ex:
+        return {"error":f"{type(ex)}-{ex}"}
 @app.delete("/delete_downloadable")
 async def delete_downloadable(downloadabletitle : str):
     try:
