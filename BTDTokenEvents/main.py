@@ -276,7 +276,7 @@ async def authenticatebtdtokenkartra(kref:str,lid:str): # ,authorization: str = 
                 elif kref in kartrakrefs.get_shop_items():
                     logging.info(f'{kref} Redirect Works')
                     price = kartrakrefs.get_shop_item_price(kref)
-                    url = f"https://blacktechday.netlify.app/purchaseshoptokens?access_token={access_token}&email={email}&dest=shop&shop_item={kref}&price={price}"
+                    url = f"https://blacktechday.netlify.app/purchaseshoptokens?access_token={access_token}&email={email}&dest=shop&shop_item={kref}&price={price}&redirect_url={redirect_url}"
                     redirect_url = kartrakrefs.get_shop_item_redirect_url(kref)
                     checksum_string = url + CHECKSUM_SECRET
                     checksum = hashlib.md5(checksum_string.encode()).hexdigest()
@@ -288,7 +288,7 @@ async def authenticatebtdtokenkartra(kref:str,lid:str): # ,authorization: str = 
                     else:
                         logging.info(f'Pending Purchase for {kref} has been created.')
                         caesarcrud.post_data(("email","checksum","shopitemkref"),(email,checksum,kref),"pendingpurchases")
-                    return RedirectResponse(url,headers={"REDIRECT_URL":redirect_url})     
+                    return RedirectResponse(url)     
             return {"message": "The username or kid doesn't exist."}
         else:
             return {"error":"Unauthorized."}
