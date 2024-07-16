@@ -44,7 +44,7 @@ class KartraShopTest(unittest.TestCase):
     def test_buy_item_1(self):
         response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=NPzfqk58IZdT&lid=11") # amari.lawal@gmail.com - get this from supabase kartraid userleads table
         # API log Success = INFO - Shop Item 1 Redirect Works
-        print(response.content)
+        print(response.headers)
     def test_buy_item_2(self):
         response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=rbGW6nusecZa&lid=11") # amari.lawal@gmail.com - get this from supabase kartraid userleads table
         # API log Success = INFO - Shop Item 2 Redirect Works

@@ -21,3 +21,5 @@ class KartraKrefs:
         return SHOP_KREFS
     def get_shop_item_price(self,shop_item):
         return os.getenv(f"{shop_item}_PRICE_TOKEN")
+    def get_shop_item_redirect_url(self,shop_item):
+        return os.getenv(f"{shop_item}_REDIRECT_LINK")
