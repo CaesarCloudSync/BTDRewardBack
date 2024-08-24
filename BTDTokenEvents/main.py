@@ -1,10 +1,15 @@
 import os
 import io
 import json
+import segno
 import base64
+import string
+import random
+import qrcode
 import hashlib
 import asyncio 
 import uvicorn
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header,Request,File, UploadFile,status,Form
 from typing import Dict,List,Any,Union
@@ -20,15 +25,14 @@ from CaesarAICronEmail.CaesarAIEmail import CaesarAIEmail
 from typing import Annotated
 import base64
 from fastapi import FastAPI, File, Form, UploadFile
+from typing import Optional
 from fastapi.responses import RedirectResponse
 import logging
 from datetime import datetime
 load_dotenv(".env")
 import random
 from KartraKrefs.KartraKrefs import KartraKrefs
-from Models.PurchaseShopItemModel import PurchaseShopItemModel
-import string
-import random
+from Models.Models import PurchaseShopItemModel
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -519,6 +523,39 @@ def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str 
                 return {"error":"purchase mismatch"}
     except Exception as ex:
         return {"error":f"{type(ex)} = {ex}"}
+@app.post('/v1/getqrcode')# GET # allow all origins all methods.
+async def getqrcode(authorization: str = Header(None)):
+    try:
+        email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
+        if email:
+            user_lead_exist = caesarcrud.check_exists(("*"),"userleads",condition=f"email = '{email}'")
+            if user_lead_exist:
+                btduuid = caesarcrud.get_data(("btduuid",),"userleads",f"email = '{email}'")[0]["btduuid"]
+                box_size = 30
+                # Create a QR code object with a larger size and higher error correction
+                
+
+                light = "white"
+                dark = "black" # data.get("dark") if data else 
+
+                imgstream = io.BytesIO()
+                video = segno.make(btduuid,micro=False)
+                video.save(imgstream, kind="png", dark=dark, light=light, scale=box_size)
+                imgstream.seek(0)
+                imgbytes = imgstream.read()
+        
+                imgbas64 = "data:image/png;base64,"+ base64.b64encode(imgbytes).decode()
+                return {"qrcode":imgbas64}
+                #       return Response(imgbytes,
+                #                headers={'Content-Disposition': f'attachment; filename="new_qr_code.png"'},
+                #                status_code=status.HTTP_200_OK)
+            else:
+                return {"error":"user does not exist."}
+        else:
+            return {"error":"no authentication."}
+    except Exception as ex:
+        return {"error":f"{type(ex)},{ex}"}
+
 @app.post("/v1/checkpurchaseintegrity")
 def checkpurchaseintegrity(purchaseitemdata :PurchaseShopItemModel,authorization: str = Header(None)):
     try:

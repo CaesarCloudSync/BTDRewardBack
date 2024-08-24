@@ -25,3 +25,4 @@ google-cloud-pubsub
 redis
 protobuf==3.20.* # Important version
 psycopg[c]
+segno

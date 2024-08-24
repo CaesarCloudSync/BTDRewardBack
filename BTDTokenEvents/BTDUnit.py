@@ -29,6 +29,15 @@ class KartraEvents(unittest.TestCase):
         print(response.json())
         self.assertEqual(response.json().get("error"),None)
         self.assertNotEqual(response.json().get("error"),"you have already done this action can't gain tokens.")
+    def test_create_qr_code(self):
+        response = requests.post(f"{uri}/loginapi",json={"email":"amari.lawal@gmail.com","password":"kya63amari"}) 
+        access_token = response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        response = requests.post(f"{uri}/v1/createqrcode",headers=headers)    
+        print(response.json())
+        #self.assertEqual(response.json().get("error"),None)
+
 class KartraAuthTokens(unittest.TestCase):
     def test_auth_kartra_user(self):
         response = requests.get(f"{uri}/v1/authenticatebtdtokenkartra?kref=CdAaTisnL3Za&lid=10") # amari.lawal@gmail.com - get this from supabase kartraid userleads table
