@@ -34,7 +34,7 @@ class KartraEvents(unittest.TestCase):
         access_token = response.json()["access_token"]
         headers = {"Authorization": f"Bearer {access_token}"}
 
-        response = requests.post(f"{uri}/v1/createqrcode",headers=headers)    
+        response = requests.post(f"{uri}/v1/getqrcode",headers=headers)    
         print(response.json())
         #self.assertEqual(response.json().get("error"),None)
 
