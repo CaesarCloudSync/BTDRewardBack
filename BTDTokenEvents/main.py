@@ -545,7 +545,7 @@ async def getqrcode(authorization: str = Header(None)):
                 imgbytes = imgstream.read()
         
                 imgbas64 = "data:image/png;base64,"+ base64.b64encode(imgbytes).decode()
-                return {"qrcode":imgbas64}
+                return {"qrcode":imgbas64,"email":email}
                 #       return Response(imgbytes,
                 #                headers={'Content-Disposition': f'attachment; filename="new_qr_code.png"'},
                 #                status_code=status.HTTP_200_OK)
