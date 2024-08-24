@@ -27,6 +27,8 @@ load_dotenv(".env")
 import random
 from KartraKrefs.KartraKrefs import KartraKrefs
 from Models.PurchaseShopItemModel import PurchaseShopItemModel
+import string
+import random
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -543,6 +545,8 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
         range_start = 10**(n-1)
         range_end = (10**n)-1
         return random.randint(range_start, range_end)
+    def id_generator(size=8, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase):
+        return ''.join(random.choice(chars) for _ in range(size))
     try:
         if api_key == KARTRA_API_KEY and api_pass == KARTRA_API_PASSWORD:
             data = dict(data)
@@ -574,7 +578,8 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             # TODO Store reward and match it to the user hash.
             lead_exists = caesarcrud.check_exists(("*"),"userleads",f"email = '{email}'")
             if not lead_exists:
-                res = caesarcrud.post_data(("kartraid","first_name","last_name","email"),(kartraid,first_name,last_name,email),"userleads")
+                btduuid = f"BTD-{id_generator()}"
+                res = caesarcrud.post_data(("kartraid","first_name","last_name","email","btduuid"),(kartraid,first_name,last_name,email,btduuid),"userleads")
                 if action_details.get("tag"):
                     tag_name = action_details.get("tag").get("tag_name")
                     if "member" in tag_name.lower():
@@ -696,7 +701,6 @@ async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbos
 
 
 if __name__ == "__main__":
-
     uvicorn.run("main:app",port=8080,log_level="info",host="0.0.0.0")
     #uvicorn.run()
     #asyncio.run(main())
