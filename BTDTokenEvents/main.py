@@ -523,7 +523,7 @@ def purchaseshopitem(purchaseitemdata :PurchaseShopItemModel,authorization: str 
                 return {"error":"purchase mismatch"}
     except Exception as ex:
         return {"error":f"{type(ex)} = {ex}"}
-@app.post('/v1/getqrcode')# GET # allow all origins all methods.
+@app.get('/v1/getqrcode')# GET # allow all origins all methods.
 async def getqrcode(authorization: str = Header(None)):
     try:
         email = caesarjwt.secure_decode(authorization.replace("Bearer ",""))["email"]
