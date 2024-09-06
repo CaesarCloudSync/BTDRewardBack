@@ -80,7 +80,7 @@ class ConnectionManager:
         """disconnect event"""
         self.active_connections.remove(websocket)
 manager = ConnectionManager()
-
+repeatable_action_tags = ["Daily Tokens","BTDADMIN"]
 @app.get('/')# GET # allow all origins all methods.
 async def index():
     return "Welcome to CaesarAIWorld!"
@@ -596,7 +596,6 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
             email = lead_user["email"]
             action_details = data["action_details"]
             action_details_str = json.dumps(action_details)
-            repeatable_action_tags = ["Daily Tokens"]
             # TODO add datetime column to rewardactionlogs
             if action_details.get("tag"):
                 if action_details.get("tag").get("tag_name") in repeatable_action_tags:
@@ -675,6 +674,66 @@ async def rewardlead(reward : int,api_key :str,api_pass:str,amariverbose: Union[
         CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Lead Error {email} - {leadaction} - {reward}","attachment":None})
         print({"error":f"{type(ex)},{ex}"})
         return {"error":f"{type(ex)},{ex}"}
+randhash = "cca347dcdaaa49a784739331115f3d1b2c451c4d919b7109a1b07f8f4e6d24dd41c92fdb91a780a08f32d79c578e592c8f302752fea9fd5c66b6bd63cd1b72141a107d2175e48c944aed448a16235b59536ebe097a5bdb859f1ba7e2824829951a8c1a9711c6fdc110cade01b3369ae200c77bf6e3c98b1d1619796562bacb3d5165e4f52a456a55247f7ba548e6668b499d302aa84646b57b9ded49d430e1c4"
+@app.post('/v1/btdadminrewardlead')# GET # allow all origins all methods.
+async def btdadminrewardlead(data : JSONStructure = None):
+    def random_with_N_digits(n):
+        range_start = 10**(n-1)
+        range_end = (10**n)-1
+        return random.randint(range_start, range_end)
+    try:
+        data = dict(data)
+        reward = int(data["reward"])
+        if reward > 0:
+            btduuid = data["btduuid"]
+            reason = data ["reason"]
+            hashauth = data["hash"]
+            action_details = {"tag":{"tag_id":"1","tag_name":"BTDADMIN","reason":reason}}
+            action_details_str = json.dumps(action_details)
+            action_details_hash = base64.b64encode(action_details_str.encode()).decode() + str(random_with_N_digits(6))
+            amariverbose = True
+            leadaction = "btdadmin_assign"
+            if hashauth == randhash:
+                btduuid_exists = caesarcrud.check_exists(("*"),"userleads",f"btduuid = '{btduuid}'")
+                if btduuid_exists:
+                    email = caesarcrud.get_data(("email",),"userleads",f"btduuid = '{btduuid}'")[0]["email"]
+                    action_exists = caesarcrud.check_exists(("*"),"rewardactionlogs",f"email = '{email}' AND action = '{leadaction}' AND actiondetailsb64 = '{action_details_hash}'")
+                    if action_exists:
+                        if action_details.get("tag"):
+                            if action_details.get("tag").get("tag_name") in repeatable_action_tags:
+                                CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{btduuid} - {email}  {leadaction} Action Details:{action_details_str}","subject":f"{email}, Repeatable Tag assignment Error {action_details.get('tag').get('tag_name')} {reason}","attachment":None})
+                
+                        print({"error":"you have already done this action can't gain tokens."})
+                        return {"error":"you have already done this action can't gain tokens."}
+                    else:
+                        old_reward = caesarcrud.get_data(("reward",),"rewardleads",f"email = '{email}'")[0]["reward"]
+                        new_reward = old_reward + reward
+                        if new_reward < 0:
+                            return {"message":"Insufficient BTD Tokens."}
+                        else:
+                            res = caesarcrud.update_data(("reward",),(new_reward,),"rewardleads",f"email = '{email}'")
+                            res = caesarcrud.post_data(("email","reward","action","actiondetailsb64"),(email,reward,leadaction,action_details_hash),"rewardactionlogs")
+                            if amariverbose:
+                                CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"{btduuid} - {email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}<br> Action Details:{action_details_str}","subject":f"{email} gained {reward} doing {leadaction}, {reason}","attachment":None})
+                        
+                            #if mulaverbose:
+                            #    CaesarAIEmail.send(**{"email":"info@mulacake.com","message":f"{email} gained {reward} BTD Tokens doing {leadaction} new balance is {new_reward}<br> Action Details:{action_details_str}","subject":f"{email} gained {reward} doing {leadaction}, {reason}","attachment":None})
+
+                        
+                            return {"message":f"lead rewarded {reward} for {leadaction}. Total: {new_reward}"}
+            
+                else:
+                    return {"error":"BTD-ID does not exist."}
+                
+            else:
+                return {"error":"not authorized to reward tokens."}
+        else:
+            return {"error":"cannot subtract tokens from user."}
+    except Exception as ex:
+        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Lead Error {btduuid} - {email} - {leadaction} - {reward} - {reason}","attachment":None})
+        return {"error":f"{type(ex)},{ex}"}
+
+
 @app.post('/v1/rewardinviteafriend')# GET # allow all origins all methods.
 async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
     try:

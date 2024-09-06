@@ -36,6 +36,11 @@ class KartraEvents(unittest.TestCase):
 
         response = requests.post(f"{uri}/v1/getqrcode",headers=headers)    
         print(response.json())
+    def test_admin_assign_tokens(self):
+        randhash = "cca347dcdaaa49a784739331115f3d1b2c451c4d919b7109a1b07f8f4e6d24dd41c92fdb91a780a08f32d79c578e592c8f302752fea9fd5c66b6bd63cd1b72141a107d2175e48c944aed448a16235b59536ebe097a5bdb859f1ba7e2824829951a8c1a9711c6fdc110cade01b3369ae200c77bf6e3c98b1d1619796562bacb3d5165e4f52a456a55247f7ba548e6668b499d302aa84646b57b9ded49d430e1c4"
+        response = requests.post(f"{uri}/v1/btdadminrewardlead",json={"reward":20,"btduuid":"BTD-MFAX95oa","reason":"unittest","hash":randhash}) 
+        result = response.json()
+        print(result)
         #self.assertEqual(response.json().get("error"),None)
 
 class KartraAuthTokens(unittest.TestCase):
