@@ -733,7 +733,23 @@ async def btdadminrewardlead(data : JSONStructure = None):
         CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Lead Error {btduuid} - {email} - {leadaction} - {reward} - {reason}","attachment":None})
         return {"error":f"{type(ex)},{ex}"}
 
+@app.get('/v1/getallbtdidsbtdadmin')# GET # allow all origins all methods.
+async def getallbtdidsbtdadmin(hash:str):
+    try:
+        if hash == randhash:
+            btduuid_exists = caesarcrud.check_exists(("*"),"userleads")
+            if btduuid_exists:
+                btduuids = caesarcrud.get_data(("email","btduuid","first_name","last_name"),"userleads")
+                return btduuids
+            else:
+                CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Severe Error: User Leads Database does not exist.","subject":f"Severe Error: User Leads Database does not exist.","attachment":None})
+                return {"error":f"{type(ex)},{ex}"}
 
+        else:
+            return {"error":"not authorized to reward tokens."}
+    except Exception as ex:
+        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Lead Error User Leads Database error","attachment":None})
+        return {"error":f"{type(ex)},{ex}"}
 @app.post('/v1/rewardinviteafriend')# GET # allow all origins all methods.
 async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbose: Union[str, None] = None,mulaverbose: Union[str, None] = None,data : JSONStructure = None):
     try:
