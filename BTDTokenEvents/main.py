@@ -810,6 +810,18 @@ async def rewardinviteafriend(reward : int,api_key :str,api_pass:str,amariverbos
         CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Lead Error {email} - {leadaction} - {reward}","attachment":None})
         return {"error":f"{type(ex)},{ex}"}
 
+@app.post("/v1/api/healthcheck")
+async def healthcheck():
+    try:
+        userlead_exists = caesarcrud.check_exists(("*"),"userleads")
+        if userlead_exists:
+            return {"status":"UP"}
+        else:
+            return {"status":"no database exists."}
+    except Exception as ex:
+        CaesarAIEmail.send(**{"email":"revisionbankedu@gmail.com","message":f"Error: {type(ex)} - {ex}","subject":f"Error: {type(ex)} - {ex}","attachment":None})
+        return {"error":f"{type(ex)},{ex}"}   
+
 
 
 if __name__ == "__main__":
